@@ -1,0 +1,751 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		7917C4441920D07B00E57657 /* ULFilePresentationProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = 7917C4421920D07B00E57657 /* ULFilePresentationProxy.h */; };
+		7917C4451920D07B00E57657 /* ULFilePresentationProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 7917C4431920D07B00E57657 /* ULFilePresentationProxy.m */; };
+		7917C44B1920D08200E57657 /* ULDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = 7917C4481920D08200E57657 /* ULDocument.m */; };
+		7917C4521920D19500E57657 /* NSDate+Utilities.h in Headers */ = {isa = PBXBuildFile; fileRef = 7917C4501920D19500E57657 /* NSDate+Utilities.h */; };
+		7917C4531920D19500E57657 /* NSDate+Utilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 7917C4511920D19500E57657 /* NSDate+Utilities.m */; };
+		7917C45A1920D19C00E57657 /* NSFileCoordinator+Convenience.h in Headers */ = {isa = PBXBuildFile; fileRef = 7917C4541920D19C00E57657 /* NSFileCoordinator+Convenience.h */; };
+		7917C45B1920D19C00E57657 /* NSFileCoordinator+Convenience.m in Sources */ = {isa = PBXBuildFile; fileRef = 7917C4551920D19C00E57657 /* NSFileCoordinator+Convenience.m */; };
+		7917C45C1920D19C00E57657 /* NSFileManager+FilesystemConvenience.h in Headers */ = {isa = PBXBuildFile; fileRef = 7917C4561920D19C00E57657 /* NSFileManager+FilesystemConvenience.h */; };
+		7917C45D1920D19C00E57657 /* NSFileManager+FilesystemConvenience.m in Sources */ = {isa = PBXBuildFile; fileRef = 7917C4571920D19C00E57657 /* NSFileManager+FilesystemConvenience.m */; };
+		7917C45E1920D19C00E57657 /* NSURL+PathUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = 7917C4581920D19C00E57657 /* NSURL+PathUtilities.h */; };
+		7917C45F1920D19C00E57657 /* NSURL+PathUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 7917C4591920D19C00E57657 /* NSURL+PathUtilities.m */; };
+		7917C4711920DA4900E57657 /* ULDocument.h in Headers */ = {isa = PBXBuildFile; fileRef = 7917C46F1920DA4900E57657 /* ULDocument.h */; };
+		7917C4721920DA4900E57657 /* ULDocument_Subclassing.h in Headers */ = {isa = PBXBuildFile; fileRef = 7917C4701920DA4900E57657 /* ULDocument_Subclassing.h */; };
+		7917C4761920DD9B00E57657 /* ULDocumentTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7917C4751920DD9B00E57657 /* ULDocumentTest.m */; };
+		7917C47F1920DF3400E57657 /* XCTestCase+TestExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 7917C47E1920DF3400E57657 /* XCTestCase+TestExtensions.m */; };
+		7917C4C61920F6D300E57657 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7917C4C51920F6D300E57657 /* Foundation.framework */; };
+		7917C4D31920F6D300E57657 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79AC7CFA1920CE3400103E36 /* XCTest.framework */; };
+		7917C4D41920F6D300E57657 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7917C4C51920F6D300E57657 /* Foundation.framework */; };
+		7917C4D51920F6D300E57657 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7917C4BE1920F65D00E57657 /* UIKit.framework */; };
+		7917C4D81920F6D300E57657 /* libULDocument iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7917C4C41920F6D300E57657 /* libULDocument iOS.a */; };
+		7917C4E71920F6EB00E57657 /* ULDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = 7917C4481920D08200E57657 /* ULDocument.m */; };
+		7917C4E81920F6EB00E57657 /* NSDate+Utilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 7917C4511920D19500E57657 /* NSDate+Utilities.m */; };
+		7917C4E91920F6EB00E57657 /* NSFileCoordinator+Convenience.m in Sources */ = {isa = PBXBuildFile; fileRef = 7917C4551920D19C00E57657 /* NSFileCoordinator+Convenience.m */; };
+		7917C4EA1920F6EB00E57657 /* NSFileManager+FilesystemConvenience.m in Sources */ = {isa = PBXBuildFile; fileRef = 7917C4571920D19C00E57657 /* NSFileManager+FilesystemConvenience.m */; };
+		7917C4EB1920F6EB00E57657 /* NSURL+PathUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 7917C4591920D19C00E57657 /* NSURL+PathUtilities.m */; };
+		7917C4EC1920F6EB00E57657 /* ULFilePresentationProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 7917C4431920D07B00E57657 /* ULFilePresentationProxy.m */; };
+		791F30F61920F79500771735 /* ULDocumentTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7917C4751920DD9B00E57657 /* ULDocumentTest.m */; };
+		791F30F71920F80400771735 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7917C4BE1920F65D00E57657 /* UIKit.framework */; };
+		7987E5CC1920FB360073FA6B /* ULDocument-Mac-Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 7987E5CA1920FB360073FA6B /* ULDocument-Mac-Prefix.pch */; };
+		7987E5CE1920FD320073FA6B /* XCTestCase+TestExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 7917C47E1920DF3400E57657 /* XCTestCase+TestExtensions.m */; };
+		7987E5D01920FE100073FA6B /* NSDate+Utilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 7917C4511920D19500E57657 /* NSDate+Utilities.m */; };
+		7987E5D11920FE100073FA6B /* NSFileCoordinator+Convenience.m in Sources */ = {isa = PBXBuildFile; fileRef = 7917C4551920D19C00E57657 /* NSFileCoordinator+Convenience.m */; };
+		7987E5D21920FE100073FA6B /* NSFileManager+FilesystemConvenience.m in Sources */ = {isa = PBXBuildFile; fileRef = 7917C4571920D19C00E57657 /* NSFileManager+FilesystemConvenience.m */; };
+		7987E5D31920FE100073FA6B /* NSURL+PathUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 7917C4591920D19C00E57657 /* NSURL+PathUtilities.m */; };
+		79AC7CEA1920CE3300103E36 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79AC7CE91920CE3300103E36 /* Cocoa.framework */; };
+		79AC7CFB1920CE3400103E36 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79AC7CFA1920CE3400103E36 /* XCTest.framework */; };
+		79AC7CFC1920CE3400103E36 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79AC7CE91920CE3300103E36 /* Cocoa.framework */; };
+		79AC7CFF1920CE3400103E36 /* ULDocument OS X.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 79AC7CE61920CE3300103E36 /* ULDocument OS X.dylib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		7917C4D61920F6D300E57657 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 79AC7CDE1920CE3300103E36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7917C4C31920F6D300E57657;
+			remoteInfo = ULDocument;
+		};
+		79AC7CFD1920CE3400103E36 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 79AC7CDE1920CE3300103E36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 79AC7CE51920CE3300103E36;
+			remoteInfo = ULDocument;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		7917C4C21920F6D300E57657 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		7917C4421920D07B00E57657 /* ULFilePresentationProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ULFilePresentationProxy.h; sourceTree = "<group>"; };
+		7917C4431920D07B00E57657 /* ULFilePresentationProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ULFilePresentationProxy.m; sourceTree = "<group>"; };
+		7917C4481920D08200E57657 /* ULDocument.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ULDocument.m; sourceTree = "<group>"; };
+		7917C4501920D19500E57657 /* NSDate+Utilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDate+Utilities.h"; sourceTree = "<group>"; };
+		7917C4511920D19500E57657 /* NSDate+Utilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDate+Utilities.m"; sourceTree = "<group>"; };
+		7917C4541920D19C00E57657 /* NSFileCoordinator+Convenience.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSFileCoordinator+Convenience.h"; sourceTree = "<group>"; };
+		7917C4551920D19C00E57657 /* NSFileCoordinator+Convenience.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSFileCoordinator+Convenience.m"; sourceTree = "<group>"; };
+		7917C4561920D19C00E57657 /* NSFileManager+FilesystemConvenience.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSFileManager+FilesystemConvenience.h"; sourceTree = "<group>"; };
+		7917C4571920D19C00E57657 /* NSFileManager+FilesystemConvenience.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSFileManager+FilesystemConvenience.m"; sourceTree = "<group>"; };
+		7917C4581920D19C00E57657 /* NSURL+PathUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURL+PathUtilities.h"; sourceTree = "<group>"; };
+		7917C4591920D19C00E57657 /* NSURL+PathUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURL+PathUtilities.m"; sourceTree = "<group>"; };
+		7917C4681920D9E200E57657 /* ULDocument.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; path = ULDocument.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		7917C46F1920DA4900E57657 /* ULDocument.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ULDocument.h; sourceTree = "<group>"; };
+		7917C4701920DA4900E57657 /* ULDocument_Subclassing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ULDocument_Subclassing.h; sourceTree = "<group>"; };
+		7917C4751920DD9B00E57657 /* ULDocumentTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ULDocumentTest.m; sourceTree = "<group>"; };
+		7917C47D1920DF3400E57657 /* XCTestCase+TestExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "XCTestCase+TestExtensions.h"; sourceTree = "<group>"; };
+		7917C47E1920DF3400E57657 /* XCTestCase+TestExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "XCTestCase+TestExtensions.m"; sourceTree = "<group>"; };
+		7917C4BE1920F65D00E57657 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/System/Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
+		7917C4C41920F6D300E57657 /* libULDocument iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libULDocument iOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		7917C4C51920F6D300E57657 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		7917C4D21920F6D300E57657 /* ULDocument Tests iOS.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "ULDocument Tests iOS.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		7987E5C91920FB360073FA6B /* ULDocument-iOS-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ULDocument-iOS-Prefix.pch"; sourceTree = "<group>"; };
+		7987E5CA1920FB360073FA6B /* ULDocument-Mac-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ULDocument-Mac-Prefix.pch"; sourceTree = "<group>"; };
+		79AC7CE61920CE3300103E36 /* ULDocument OS X.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = "ULDocument OS X.dylib"; sourceTree = BUILT_PRODUCTS_DIR; };
+		79AC7CE91920CE3300103E36 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		79AC7CEC1920CE3300103E36 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		79AC7CED1920CE3300103E36 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		79AC7CEE1920CE3300103E36 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		79AC7CF91920CE3400103E36 /* ULDocument Tests Mac.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "ULDocument Tests Mac.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		79AC7CFA1920CE3400103E36 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
+		79AC7D151920D00A00103E36 /* ULDocumentTests-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "ULDocumentTests-Info.plist"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		7917C4C11920F6D300E57657 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				791F30F71920F80400771735 /* UIKit.framework in Frameworks */,
+				7917C4C61920F6D300E57657 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7917C4CF1920F6D300E57657 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7917C4D31920F6D300E57657 /* XCTest.framework in Frameworks */,
+				7917C4D81920F6D300E57657 /* libULDocument iOS.a in Frameworks */,
+				7917C4D51920F6D300E57657 /* UIKit.framework in Frameworks */,
+				7917C4D41920F6D300E57657 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		79AC7CE31920CE3300103E36 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				79AC7CEA1920CE3300103E36 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		79AC7CF61920CE3400103E36 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				79AC7CFC1920CE3400103E36 /* Cocoa.framework in Frameworks */,
+				79AC7CFF1920CE3400103E36 /* ULDocument OS X.dylib in Frameworks */,
+				79AC7CFB1920CE3400103E36 /* XCTest.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		7917C4411920D07B00E57657 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				7917C4501920D19500E57657 /* NSDate+Utilities.h */,
+				7917C4511920D19500E57657 /* NSDate+Utilities.m */,
+				7917C4541920D19C00E57657 /* NSFileCoordinator+Convenience.h */,
+				7917C4551920D19C00E57657 /* NSFileCoordinator+Convenience.m */,
+				7917C4561920D19C00E57657 /* NSFileManager+FilesystemConvenience.h */,
+				7917C4571920D19C00E57657 /* NSFileManager+FilesystemConvenience.m */,
+				7917C4581920D19C00E57657 /* NSURL+PathUtilities.h */,
+				7917C4591920D19C00E57657 /* NSURL+PathUtilities.m */,
+				7917C4421920D07B00E57657 /* ULFilePresentationProxy.h */,
+				7917C4431920D07B00E57657 /* ULFilePresentationProxy.m */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		7917C46E1920DA4900E57657 /* Header */ = {
+			isa = PBXGroup;
+			children = (
+				7917C46F1920DA4900E57657 /* ULDocument.h */,
+				7917C4701920DA4900E57657 /* ULDocument_Subclassing.h */,
+			);
+			path = Header;
+			sourceTree = "<group>";
+		};
+		7917C47B1920DF3400E57657 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				7917C47D1920DF3400E57657 /* XCTestCase+TestExtensions.h */,
+				7917C47E1920DF3400E57657 /* XCTestCase+TestExtensions.m */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		79AC7CDD1920CE3300103E36 = {
+			isa = PBXGroup;
+			children = (
+				7917C4681920D9E200E57657 /* ULDocument.podspec */,
+				7917C46E1920DA4900E57657 /* Header */,
+				79AC7CEF1920CE3300103E36 /* Source */,
+				79AC7D001920CE3400103E36 /* Tests */,
+				79AC7CE81920CE3300103E36 /* Frameworks */,
+				79AC7CE71920CE3300103E36 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		79AC7CE71920CE3300103E36 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				79AC7CE61920CE3300103E36 /* ULDocument OS X.dylib */,
+				79AC7CF91920CE3400103E36 /* ULDocument Tests Mac.xctest */,
+				7917C4C41920F6D300E57657 /* libULDocument iOS.a */,
+				7917C4D21920F6D300E57657 /* ULDocument Tests iOS.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		79AC7CE81920CE3300103E36 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				7917C4BE1920F65D00E57657 /* UIKit.framework */,
+				79AC7CE91920CE3300103E36 /* Cocoa.framework */,
+				79AC7CFA1920CE3400103E36 /* XCTest.framework */,
+				7917C4C51920F6D300E57657 /* Foundation.framework */,
+				79AC7CEB1920CE3300103E36 /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		79AC7CEB1920CE3300103E36 /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				79AC7CEC1920CE3300103E36 /* Foundation.framework */,
+				79AC7CED1920CE3300103E36 /* CoreData.framework */,
+				79AC7CEE1920CE3300103E36 /* AppKit.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		79AC7CEF1920CE3300103E36 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				7917C4481920D08200E57657 /* ULDocument.m */,
+				7917C4411920D07B00E57657 /* Utilities */,
+				79AC7D1C1920D02300103E36 /* Other */,
+			);
+			path = Source;
+			sourceTree = "<group>";
+		};
+		79AC7D001920CE3400103E36 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				7917C4751920DD9B00E57657 /* ULDocumentTest.m */,
+				7917C47B1920DF3400E57657 /* Utilities */,
+				79AC7D141920D00A00103E36 /* Other */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		79AC7D141920D00A00103E36 /* Other */ = {
+			isa = PBXGroup;
+			children = (
+				79AC7D151920D00A00103E36 /* ULDocumentTests-Info.plist */,
+			);
+			path = Other;
+			sourceTree = "<group>";
+		};
+		79AC7D1C1920D02300103E36 /* Other */ = {
+			isa = PBXGroup;
+			children = (
+				7987E5C91920FB360073FA6B /* ULDocument-iOS-Prefix.pch */,
+				7987E5CA1920FB360073FA6B /* ULDocument-Mac-Prefix.pch */,
+			);
+			path = Other;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		79AC7CE41920CE3300103E36 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7917C45A1920D19C00E57657 /* NSFileCoordinator+Convenience.h in Headers */,
+				7917C4521920D19500E57657 /* NSDate+Utilities.h in Headers */,
+				7987E5CC1920FB360073FA6B /* ULDocument-Mac-Prefix.pch in Headers */,
+				7917C4441920D07B00E57657 /* ULFilePresentationProxy.h in Headers */,
+				7917C4721920DA4900E57657 /* ULDocument_Subclassing.h in Headers */,
+				7917C45C1920D19C00E57657 /* NSFileManager+FilesystemConvenience.h in Headers */,
+				7917C45E1920D19C00E57657 /* NSURL+PathUtilities.h in Headers */,
+				7917C4711920DA4900E57657 /* ULDocument.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		7917C4C31920F6D300E57657 /* ULDocument iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7917C4E11920F6D400E57657 /* Build configuration list for PBXNativeTarget "ULDocument iOS" */;
+			buildPhases = (
+				7917C4C01920F6D300E57657 /* Sources */,
+				7917C4C11920F6D300E57657 /* Frameworks */,
+				7917C4C21920F6D300E57657 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "ULDocument iOS";
+			productName = ULDocument;
+			productReference = 7917C4C41920F6D300E57657 /* libULDocument iOS.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		7917C4D11920F6D300E57657 /* ULDocument Tests iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7917C4E41920F6D400E57657 /* Build configuration list for PBXNativeTarget "ULDocument Tests iOS" */;
+			buildPhases = (
+				7917C4CE1920F6D300E57657 /* Sources */,
+				7917C4CF1920F6D300E57657 /* Frameworks */,
+				7917C4D01920F6D300E57657 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				7917C4D71920F6D300E57657 /* PBXTargetDependency */,
+			);
+			name = "ULDocument Tests iOS";
+			productName = ULDocumentTests;
+			productReference = 7917C4D21920F6D300E57657 /* ULDocument Tests iOS.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		79AC7CE51920CE3300103E36 /* ULDocument Mac */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 79AC7D0A1920CE3400103E36 /* Build configuration list for PBXNativeTarget "ULDocument Mac" */;
+			buildPhases = (
+				79AC7CE21920CE3300103E36 /* Sources */,
+				79AC7CE31920CE3300103E36 /* Frameworks */,
+				79AC7CE41920CE3300103E36 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "ULDocument Mac";
+			productName = ULDocument;
+			productReference = 79AC7CE61920CE3300103E36 /* ULDocument OS X.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+		79AC7CF81920CE3400103E36 /* ULDocument Tests Mac */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 79AC7D0D1920CE3400103E36 /* Build configuration list for PBXNativeTarget "ULDocument Tests Mac" */;
+			buildPhases = (
+				79AC7CF51920CE3400103E36 /* Sources */,
+				79AC7CF61920CE3400103E36 /* Frameworks */,
+				79AC7CF71920CE3400103E36 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				79AC7CFE1920CE3400103E36 /* PBXTargetDependency */,
+			);
+			name = "ULDocument Tests Mac";
+			productName = ULDocumentTests;
+			productReference = 79AC7CF91920CE3400103E36 /* ULDocument Tests Mac.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		79AC7CDE1920CE3300103E36 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0510;
+				ORGANIZATIONNAME = "The Soulmen";
+				TargetAttributes = {
+					7917C4D11920F6D300E57657 = {
+						TestTargetID = 79AC7CE51920CE3300103E36;
+					};
+					79AC7CF81920CE3400103E36 = {
+						TestTargetID = 79AC7CE51920CE3300103E36;
+					};
+				};
+			};
+			buildConfigurationList = 79AC7CE11920CE3300103E36 /* Build configuration list for PBXProject "ULDocument" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 79AC7CDD1920CE3300103E36;
+			productRefGroup = 79AC7CE71920CE3300103E36 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				79AC7CE51920CE3300103E36 /* ULDocument Mac */,
+				79AC7CF81920CE3400103E36 /* ULDocument Tests Mac */,
+				7917C4C31920F6D300E57657 /* ULDocument iOS */,
+				7917C4D11920F6D300E57657 /* ULDocument Tests iOS */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		7917C4D01920F6D300E57657 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		79AC7CF71920CE3400103E36 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		7917C4C01920F6D300E57657 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7917C4E81920F6EB00E57657 /* NSDate+Utilities.m in Sources */,
+				7917C4EB1920F6EB00E57657 /* NSURL+PathUtilities.m in Sources */,
+				7917C4EC1920F6EB00E57657 /* ULFilePresentationProxy.m in Sources */,
+				7917C4EA1920F6EB00E57657 /* NSFileManager+FilesystemConvenience.m in Sources */,
+				7917C4E71920F6EB00E57657 /* ULDocument.m in Sources */,
+				7917C4E91920F6EB00E57657 /* NSFileCoordinator+Convenience.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7917C4CE1920F6D300E57657 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7987E5CE1920FD320073FA6B /* XCTestCase+TestExtensions.m in Sources */,
+				7987E5D01920FE100073FA6B /* NSDate+Utilities.m in Sources */,
+				7987E5D31920FE100073FA6B /* NSURL+PathUtilities.m in Sources */,
+				7987E5D21920FE100073FA6B /* NSFileManager+FilesystemConvenience.m in Sources */,
+				791F30F61920F79500771735 /* ULDocumentTest.m in Sources */,
+				7987E5D11920FE100073FA6B /* NSFileCoordinator+Convenience.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		79AC7CE21920CE3300103E36 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7917C4451920D07B00E57657 /* ULFilePresentationProxy.m in Sources */,
+				7917C44B1920D08200E57657 /* ULDocument.m in Sources */,
+				7917C45D1920D19C00E57657 /* NSFileManager+FilesystemConvenience.m in Sources */,
+				7917C4531920D19500E57657 /* NSDate+Utilities.m in Sources */,
+				7917C45B1920D19C00E57657 /* NSFileCoordinator+Convenience.m in Sources */,
+				7917C45F1920D19C00E57657 /* NSURL+PathUtilities.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		79AC7CF51920CE3400103E36 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7917C47F1920DF3400E57657 /* XCTestCase+TestExtensions.m in Sources */,
+				7917C4761920DD9B00E57657 /* ULDocumentTest.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		7917C4D71920F6D300E57657 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7917C4C31920F6D300E57657 /* ULDocument iOS */;
+			targetProxy = 7917C4D61920F6D300E57657 /* PBXContainerItemProxy */;
+		};
+		79AC7CFE1920CE3400103E36 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 79AC7CE51920CE3300103E36 /* ULDocument Mac */;
+			targetProxy = 79AC7CFD1920CE3400103E36 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		7917C4E21920F6D400E57657 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)";
+				DSTROOT = /tmp/ULDocument.dst;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Source/Other/ULDocument-iOS-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		7917C4E31920F6D400E57657 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)";
+				DSTROOT = /tmp/ULDocument.dst;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Source/Other/ULDocument-iOS-Prefix.pch";
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		7917C4E51920F6D400E57657 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/libULDocument iOS.a";
+				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Source/Other/ULDocument-iOS-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = "Tests/Other/ULDocumentTests-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				TEST_HOST = "";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Debug;
+		};
+		7917C4E61920F6D400E57657 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/libULDocument iOS.a";
+				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Source/Other/ULDocument-iOS-Prefix.pch";
+				INFOPLIST_FILE = "Tests/Other/ULDocumentTests-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				TEST_HOST = "";
+				VALIDATE_PRODUCT = YES;
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Release;
+		};
+		79AC7D081920CE3400103E36 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		79AC7D091920CE3400103E36 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		79AC7D0B1920CE3400103E36 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Source/Other/ULDocument-Mac-Prefix.pch";
+				PRODUCT_NAME = "ULDocument OS X";
+			};
+			name = Debug;
+		};
+		79AC7D0C1920CE3400103E36 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Source/Other/ULDocument-Mac-Prefix.pch";
+				PRODUCT_NAME = "ULDocument OS X";
+			};
+			name = Release;
+		};
+		79AC7D0E1920CE3400103E36 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/ULDocument OS X.dylib";
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+					"$(inherited)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Source/Other/ULDocument-Mac-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = "Tests/Other/ULDocumentTests-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUNDLE_LOADER)";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Debug;
+		};
+		79AC7D0F1920CE3400103E36 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/ULDocument OS X.dylib";
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+					"$(inherited)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Source/Other/ULDocument-Mac-Prefix.pch";
+				INFOPLIST_FILE = "Tests/Other/ULDocumentTests-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUNDLE_LOADER)";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		7917C4E11920F6D400E57657 /* Build configuration list for PBXNativeTarget "ULDocument iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7917C4E21920F6D400E57657 /* Debug */,
+				7917C4E31920F6D400E57657 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7917C4E41920F6D400E57657 /* Build configuration list for PBXNativeTarget "ULDocument Tests iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7917C4E51920F6D400E57657 /* Debug */,
+				7917C4E61920F6D400E57657 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		79AC7CE11920CE3300103E36 /* Build configuration list for PBXProject "ULDocument" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				79AC7D081920CE3400103E36 /* Debug */,
+				79AC7D091920CE3400103E36 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		79AC7D0A1920CE3400103E36 /* Build configuration list for PBXNativeTarget "ULDocument Mac" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				79AC7D0B1920CE3400103E36 /* Debug */,
+				79AC7D0C1920CE3400103E36 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		79AC7D0D1920CE3400103E36 /* Build configuration list for PBXNativeTarget "ULDocument Tests Mac" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				79AC7D0E1920CE3400103E36 /* Debug */,
+				79AC7D0F1920CE3400103E36 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 79AC7CDE1920CE3300103E36 /* Project object */;
+}
