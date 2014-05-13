@@ -1,5 +1,5 @@
 # ULDocument
-This repository contains `ULDocument`, an abstract document class designed as a lightweight alternative to NSDocument and UIDocument. It is used inside our applications [Ulysses][1] and [Daedalus][2].
+This repository contains `ULDocument`, an abstract document class designed as a lightweight alternative to NSDocument and UIDocument. It is used inside our applications [Ulysses](http://www.ulyssesapp.com) and [Daedalus](http://www.daedalusapp.com).
 
 The benefits of `ULDocument` are:
 
@@ -23,9 +23,9 @@ Alternatively, you can clone this repository and compile ULDocument as library. 
 
 	- (NSFileWrapper *)fileWrapperWithError:(NSError **)outError;
 
-Your implementation of `-readFromFileWrapper:` should store the read contents into a property of your subclass. For example, a text document should have a property `text` that will be set when reading the document. This property is typically a mutable object bound to your document editor view. Your document subclass must observe changes on this property and should call `-updateChangeDate` whenever changes has been observed. To support autosaving and undoing, any document editor must also make use the [`undoManager`][3] provided by your document instance. 
+Your implementation of `-readFromFileWrapper:` should store the read contents into a property of your subclass. For example, a text document should have a property `text` that will be set when reading the document. This property is typically a mutable object bound to your document editor view. Your document subclass must observe changes on this property and should call `-updateChangeDate` whenever changes has been observed. To support autosaving and undoing, any document editor must also make use the [`undoManager`](https://developer.apple.com/library/mac/documentation/cocoa/reference/foundation/Classes/NSUndoManager_Class/Reference/Reference.html) provided by your document instance. 
 
-All magic required for iCloud is already implemented inside ULDocument: It automatically updates a document’s contents if external changes occur and correctly synchronizes your file accesses. So, it is just sufficient to store your document inside the [ubiquity container][4] of your application.
+All magic required for iCloud is already implemented inside ULDocument: It automatically updates a document’s contents if external changes occur and correctly synchronizes your file accesses. So, it is just sufficient to store your document inside the [ubiquity container](https://developer.apple.com/library/ios/documentation/General/Conceptual/iCloudDesignGuide/Chapters/DesigningForDocumentsIniCloud.html#//apple_ref/doc/uid/TP40012094-CH2-SW1) of your application.
 
 ## Using ULDocument
 You create a new instance of your document subclass using: `-initWithFileURL:readOnly:`. Usually, you may set `readOnly` to `NO`. However, for performance reasons you should consider to open documents in read-only mode whenever it is sufficient.
@@ -38,8 +38,3 @@ If a document is no longer needed, you should close it by using `-closeWithCompl
 Since ULDocument embraces the NSFileCoordinator APIs of OS X and iOS, it may manipulate any properties on an arbitrary background thread. Whenever you’re observing properties of ULDocument from a view, you may need to dispatch the observation handler on main queue. 
 
 Generally, you should handle any observations asynchronously to prevent deadlocks: ULDocument uses locks to synchronize file and property accesses very extensively.
-
-[1]:	http://www.ulyssesapp.com
-[2]:	http://www.daedalusapp.com
-[3]:	https://developer.apple.com/library/mac/documentation/cocoa/reference/foundation/Classes/NSUndoManager_Class/Reference/Reference.html
-[4]:	https://developer.apple.com/library/ios/documentation/General/Conceptual/iCloudDesignGuide/Chapters/DesigningForDocumentsIniCloud.html#//apple_ref/doc/uid/TP40012094-CH2-SW1
