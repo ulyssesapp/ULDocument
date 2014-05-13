@@ -39,7 +39,7 @@ Since ULDocument embraces the NSFileCoordinator APIs of OS X and iOS, it may man
 
 Generally, you should handle any observations asynchronously to prevent deadlocks: ULDocument uses locks to synchronize file and property accesses very extensively.
 
-[1]:	www.ulyssesapp.com
-[2]:	www.daedalusapp.com
+[1]:	http://www.ulyssesapp.com
+[2]:	http://www.daedalusapp.com
 [3]:	https://developer.apple.com/library/mac/documentation/cocoa/reference/foundation/Classes/NSUndoManager_Class/Reference/Reference.html
 [4]:	https://developer.apple.com/library/ios/documentation/General/Conceptual/iCloudDesignGuide/Chapters/DesigningForDocumentsIniCloud.html#//apple_ref/doc/uid/TP40012094-CH2-SW1
