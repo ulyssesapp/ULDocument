@@ -1,5 +1,5 @@
 # ULDocument
-This repository contains `ULDocument`, an abstract document class designed as a lightweight alternative to NSDocument and UIDocument. It is used inside our applications [Ulysses](http://www.ulyssesapp.com) and [Daedalus](http://www.daedalusapp.com).
+This repository contains `ULDocument`, an abstract document class designed as a lightweight alternative to NSDocument and UIDocument. It is used inside our applications [Ulysses](http://www.ulyssesapp.com) and [Daedalus](http://www.daedalusapp.com). You are free to use it in your own applications under the terms of the [MIT license](LICENSE.txt).
 
 The benefits of `ULDocument` are:
 
