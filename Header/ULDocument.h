@@ -23,27 +23,6 @@
 //
 
 /*!
- @abstract The kind of changes known to ULDocument.
- @discussion The first four constants describe the type of change done whereas the latter define options to pass along the change notifications.
- 
- @const ULDocumentChangeDone		A change was done to the document.
- @const ULDocumentChangeUndone		A previously done/redone change was undone on the document.
- @const ULDocumentChangeUndone		A previously undone change was redone on the document.
- @const ULDocumentChangeCleared		The current state of the document reflects the state on disk.
- 
- @const ULDocumentChangeNotUndoable	The passed type of change cannot be undone. Only applies to ULDocumentChangeDone, ULDocumentChangeUndone and ULDocumentChangeRedone respectively.
- */
-typedef enum : NSUInteger {
-    ULDocumentChangeDone		= 0,
-    ULDocumentChangeUndone		= 1,
-    ULDocumentChangeRedone		= 2,
-    ULDocumentChangeCleared		= 3,
-	
-    ULDocumentChangeNotUndoable	= 1 << 8
-} ULDocumentChangeKind;
-
-
-/*!
  @abstract The kind of save operations known to ULDocument.
  
  @const ULDocumentSave		The document was saved by explicit user action. This usually creates a new version of the document on disk. If the URL of the document changed, the document is moved.
