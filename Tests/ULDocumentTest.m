@@ -156,7 +156,7 @@ NSString *kTestText3	= @"Fusce tincidunt erat sit amet magna porttitor nec iacul
 	
 	ULTestDocument *document = [[ULTestDocument alloc] initWithFileURL:url readOnly:NO];
 	XCTAssertNotNil(document, @"Document not created");
-	XCTAssertTrue([document.fileURL isEqualToFileURL: url], @"URL not set");
+	XCTAssertTrue([document.fileURL ul_isEqualToFileURL:url], @"URL not set");
 	XCTAssertNil(document.fileModificationDate, @"No change date should be set");
 	XCTAssertNil(document.changeDate, @"No change date should be set");
 	XCTAssertFalse(document.documentIsOpen, @"Document should be closed yet");
@@ -188,7 +188,7 @@ NSString *kTestText3	= @"Fusce tincidunt erat sit amet magna porttitor nec iacul
 	
 	ULTestDocument *document = [[ULTestDocument alloc] initWithFileURL:url readOnly:NO];
 	XCTAssertNotNil(document, @"Document not created");
-	XCTAssertTrue([document.fileURL isEqualToFileURL: url], @"URL not set");
+	XCTAssertTrue([document.fileURL ul_isEqualToFileURL:url], @"URL not set");
 	
 	// Open document
 	BOOL success = [self performOperation:^(void (^handler)(BOOL)) {
@@ -207,7 +207,7 @@ NSString *kTestText3	= @"Fusce tincidunt erat sit amet magna porttitor nec iacul
 	
 	ULTestDocument *document = [[ULTestDocument alloc] initWithFileURL:url readOnly:NO];
 	XCTAssertNotNil(document, @"Document not created");
-	XCTAssertTrue([document.fileURL isEqualToFileURL: url], @"URL not set");
+	XCTAssertTrue([document.fileURL ul_isEqualToFileURL:url], @"URL not set");
 		
 	// Open document
 	BOOL success = [self performOperation:^(void (^handler)(BOOL)) {
@@ -237,7 +237,7 @@ NSString *kTestText3	= @"Fusce tincidunt erat sit amet magna porttitor nec iacul
 	
 	ULTestDocument *document = [[ULTestDocument alloc] initWithFileURL:url readOnly:NO];
 	XCTAssertNotNil(document, @"Document not created");
-	XCTAssertTrue([document.fileURL isEqualToFileURL: url], @"URL not set");
+	XCTAssertTrue([document.fileURL ul_isEqualToFileURL:url], @"URL not set");
 
 	// Setup observer
 	__block NSNotification *notification;
@@ -276,7 +276,7 @@ NSString *kTestText3	= @"Fusce tincidunt erat sit amet magna porttitor nec iacul
 	
 	ULTestDocument *document = [[ULTestDocument alloc] initWithFileURL:url readOnly:NO];
 	XCTAssertNotNil(document, @"Document not created");
-	XCTAssertTrue([document.fileURL isEqualToFileURL: url], @"URL not set");
+	XCTAssertTrue([document.fileURL ul_isEqualToFileURL:url], @"URL not set");
 	
 	// Setup observer
 	__block NSNotification *notification;
@@ -315,7 +315,7 @@ NSString *kTestText3	= @"Fusce tincidunt erat sit amet magna porttitor nec iacul
 	
 	ULTestDocument *document = [[ULTestDocument alloc] initWithFileURL:url readOnly:NO];
 	XCTAssertNotNil(document, @"Document not created");
-	XCTAssertTrue([document.fileURL isEqualToFileURL: url], @"URL not set");
+	XCTAssertTrue([document.fileURL ul_isEqualToFileURL:url], @"URL not set");
 	XCTAssertNil(document.fileModificationDate, @"No change date should be set");
 	XCTAssertNil(document.changeDate, @"No change date should be set");
 	XCTAssertFalse(document.documentIsOpen, @"Document should be closed yet");
@@ -367,7 +367,7 @@ NSString *kTestText3	= @"Fusce tincidunt erat sit amet magna porttitor nec iacul
 		[document saveToURL:url forSaveOperation:ULDocumentSave completionHandler:handler];
 	}];
 	XCTAssertTrue(success, @"Writing failed");
-	XCTAssertTrue([document.fileURL isEqualToFileURL: url], @"File URL not updated");
+	XCTAssertTrue([document.fileURL ul_isEqualToFileURL:url], @"File URL not updated");
 	XCTAssertNotNil(document.fileModificationDate, @"File date not updated");
 	XCTAssertFalse(document.hasUnsavedChanges, @"State should be cleared");
 	
@@ -394,7 +394,7 @@ NSString *kTestText3	= @"Fusce tincidunt erat sit amet magna porttitor nec iacul
 		[document saveToURL:url forSaveOperation:ULDocumentSave completionHandler:handler];
 	}];
 	XCTAssertTrue(success, @"Writing failed");
-	XCTAssertTrue([document.fileURL isEqualToFileURL: url], @"File URL not updated");
+	XCTAssertTrue([document.fileURL ul_isEqualToFileURL:url], @"File URL not updated");
 	XCTAssertNotNil(document.fileModificationDate, @"File date not updated");
 	XCTAssertFalse(document.hasUnsavedChanges, @"State should be cleared");
 	XCTAssertNil(document.recognizedFilenameChange, @"Should not have notified new URL.");
@@ -962,7 +962,7 @@ NSString *kTestText3	= @"Fusce tincidunt erat sit amet magna porttitor nec iacul
 	}];
 	XCTAssertTrue(success, @"Exporting failed");
 	
-	XCTAssertTrue([document.fileURL isEqualToFileURL: url], @"URL must not change");
+	XCTAssertTrue([document.fileURL ul_isEqualToFileURL:url], @"URL must not change");
 	XCTAssertTrue(document.hasUnsavedChanges, @"Document should remain dirty!");
 	XCTAssertEqualObjects(document.text, kTestText2, @"Content should not change");
 	XCTAssertEqualObjects(document.fileModificationDate, fileChange, @"Change date mut not change");
@@ -1233,19 +1233,19 @@ NSString *kTestText3	= @"Fusce tincidunt erat sit amet magna porttitor nec iacul
 	}];
 	
 	// Check urls
-	XCTAssertTrue([document1.fileURL isEqualToFileURL: oldURL], @"URL mismatch");
-	XCTAssertTrue([document2.fileURL isEqualToFileURL: oldURL], @"URL mismatch");
+	XCTAssertTrue([document1.fileURL ul_isEqualToFileURL:oldURL], @"URL mismatch");
+	XCTAssertTrue([document2.fileURL ul_isEqualToFileURL:oldURL], @"URL mismatch");
 	
 	
 	// Wait for changes to map into documents
 	ULWaitOnAssertions(
-	   ULAwaitedAssertion([document1.fileURL isEqualToFileURL: url], @"URL not updated"),
-	   ULAwaitedAssertion([document2.fileURL isEqualToFileURL: url], @"URL not updated"),
+	   ULAwaitedAssertion([document1.fileURL ul_isEqualToFileURL:url], @"URL not updated"),
+	   ULAwaitedAssertion([document2.fileURL ul_isEqualToFileURL:url], @"URL not updated"),
 	);
 	
 	// Check urls and change state
-	XCTAssertTrue([document1.fileURL isEqualToFileURL: url], @"URL not updated");
-	XCTAssertTrue([document2.fileURL isEqualToFileURL: url], @"URL not updated");
+	XCTAssertTrue([document1.fileURL ul_isEqualToFileURL:url], @"URL not updated");
+	XCTAssertTrue([document2.fileURL ul_isEqualToFileURL:url], @"URL not updated");
 	XCTAssertEqualObjects(document1.fileModificationDate, fileChange, @"Change date should not change");
 	XCTAssertEqualObjects(document2.fileModificationDate, fileChange, @"Change date should not change");
 	
@@ -1260,7 +1260,7 @@ NSString *kTestText3	= @"Fusce tincidunt erat sit amet magna porttitor nec iacul
 	
 	// Delete file
 	[[[NSFileCoordinator alloc] initWithFilePresenter: nil] coordinateWritingItemAtURL:url options:NSFileCoordinatorWritingForDeleting error:NULL byAccessor:^(NSURL *newURL) {
-		XCTAssertTrue([url isEqualToFileURL: newURL], @"URL mismatch");
+		XCTAssertTrue([url ul_isEqualToFileURL:newURL], @"URL mismatch");
 		XCTAssertTrue([NSFileManager.defaultManager removeItemAtURL:url error:NULL], @"Remove failed");
 	}];
 	
@@ -1318,12 +1318,12 @@ NSString *kTestText3	= @"Fusce tincidunt erat sit amet magna porttitor nec iacul
 	// Wait for changes to map into documents
 	ULWaitOnAssertions(
 					   ULAwaitedAssertion([document.text isEqual: kTestText2], @"URL not updated"),
-					   ULAwaitedAssertion([documentReadOnly.fileURL isEqualToFileURL: url], @"URL not updated"),
+					   ULAwaitedAssertion([documentReadOnly.fileURL ul_isEqualToFileURL:url], @"URL not updated"),
 					   );
 	
 	// Check urls and change state
-	XCTAssertTrue([document.fileURL isEqualToFileURL: url], @"URL changed");
-	XCTAssertTrue([documentReadOnly.fileURL isEqualToFileURL: url], @"URL changed");
+	XCTAssertTrue([document.fileURL ul_isEqualToFileURL:url], @"URL changed");
+	XCTAssertTrue([documentReadOnly.fileURL ul_isEqualToFileURL:url], @"URL changed");
 	XCTAssertTrue([document.changeDate timeIntervalSinceDate: fileChange] > 0, @"Change date should change");
 	XCTAssertEqualObjects(documentReadOnly.fileModificationDate, fileChange, @"Change date should not change");
 	
@@ -1341,18 +1341,18 @@ NSString *kTestText3	= @"Fusce tincidunt erat sit amet magna porttitor nec iacul
 	}];
 	
 	// Check urls
-	XCTAssertTrue([document.fileURL isEqualToFileURL: oldURL], @"URL mismatch");
-	XCTAssertTrue([documentReadOnly.fileURL isEqualToFileURL: oldURL], @"URL mismatch");
+	XCTAssertTrue([document.fileURL ul_isEqualToFileURL:oldURL], @"URL mismatch");
+	XCTAssertTrue([documentReadOnly.fileURL ul_isEqualToFileURL:oldURL], @"URL mismatch");
 	
 	// Wait for changes to map into documents
 	ULWaitOnAssertions(
-		ULAwaitedAssertion([document.fileURL isEqualToFileURL: url], @"URL not updated"),
-		ULAwaitedAssertion([document.recognizedMoveURL isEqualToFileURL: url], @"Should notify about move.")
+		ULAwaitedAssertion([document.fileURL ul_isEqualToFileURL:url], @"URL not updated"),
+		ULAwaitedAssertion([document.recognizedMoveURL ul_isEqualToFileURL:url], @"Should notify about move.")
 	);
 	
 	// Check urls and change state
-	XCTAssertTrue([document.fileURL isEqualToFileURL: url], @"URL not updated");
-	XCTAssertTrue([documentReadOnly.fileURL isEqualToFileURL: oldURL], @"URL not updated");
+	XCTAssertTrue([document.fileURL ul_isEqualToFileURL:url], @"URL not updated");
+	XCTAssertTrue([documentReadOnly.fileURL ul_isEqualToFileURL:oldURL], @"URL not updated");
 	XCTAssertTrue([document.changeDate timeIntervalSinceDate: fileChange] > 0, @"Change date should change");
 	XCTAssertEqualObjects(documentReadOnly.fileModificationDate, fileChange, @"Change date should not change");
 }
@@ -1695,7 +1695,7 @@ NSString *kTestText3	= @"Fusce tincidunt erat sit amet magna porttitor nec iacul
 	}];
 
 	XCTAssertTrue(success, @"Writing failed");
-	XCTAssertTrue([document.fileURL isEqualToFileURL: documentURL], @"File URL not updated");
+	XCTAssertTrue([document.fileURL ul_isEqualToFileURL: documentURL], @"File URL not updated");
 	XCTAssertNotNil(document.fileModificationDate, @"File date not updated");
 	XCTAssertFalse(document.hasUnsavedChanges, @"State should be cleared");
 	
@@ -1719,7 +1719,7 @@ NSString *kTestText3	= @"Fusce tincidunt erat sit amet magna porttitor nec iacul
 	
 	// But should save properly
 	XCTAssertTrue(success, @"Writing failed");
-	XCTAssertTrue([document.fileURL isEqualToFileURL: documentURL], @"File URL not updated");
+	XCTAssertTrue([document.fileURL ul_isEqualToFileURL: documentURL], @"File URL not updated");
 	XCTAssertNotNil(document.fileModificationDate, @"File date not updated");
 	XCTAssertFalse(document.hasUnsavedChanges, @"State should be cleared");
 	

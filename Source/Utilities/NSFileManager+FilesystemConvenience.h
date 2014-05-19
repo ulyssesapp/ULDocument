@@ -30,6 +30,6 @@
 /*!
  @abstract Moves a file from the given source URL to a target URL allowing changes of the filename case.
  */
-- (BOOL)moveItemCaseSensistiveAtURL:(NSURL *)itemURL toURL:(NSURL *)dstURL error:(NSError **)error;
+- (BOOL)ul_moveItemCaseSensistiveAtURL:(NSURL *)itemURL toURL:(NSURL *)dstURL error:(NSError **)error;
 
 @end

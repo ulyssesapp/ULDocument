@@ -28,11 +28,11 @@
 
 @implementation NSFileCoordinator (Convenience)
 
-- (void)coordinateMovingItemAtURL:(NSURL *)url toURL:(NSURL *)newURL error:(NSError **)outError byAccessor:(void (^)(NSURL *oldURL, NSURL *newURL))writer
+- (void)ul_coordinateMovingItemAtURL:(NSURL *)url toURL:(NSURL *)newURL error:(NSError **)outError byAccessor:(void (^)(NSURL *oldURL, NSURL *newURL))writer
 {
 	[self coordinateWritingItemAtURL:url options:NSFileCoordinatorWritingForMoving writingItemAtURL:newURL options:0 error:outError byAccessor:^(NSURL *oldURL, NSURL *coordinatedNewURL) {
 		// New URL equivalent beside filename case: use originally passed version of new URL
-		if ([coordinatedNewURL isEqualToFileURL: newURL])
+		if ([coordinatedNewURL ul_isEqualToFileURL:newURL])
 			writer(oldURL, newURL);
 		
 		// Use new URL provided by coordinator

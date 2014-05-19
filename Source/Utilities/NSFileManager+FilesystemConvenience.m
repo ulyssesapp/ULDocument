@@ -28,10 +28,10 @@
 
 @implementation NSFileManager (FilesystemConvenience)
 
-- (BOOL)moveItemCaseSensistiveAtURL:(NSURL *)itemURL toURL:(NSURL *)dstURL error:(NSError **)error
+- (BOOL)ul_moveItemCaseSensistiveAtURL:(NSURL *)itemURL toURL:(NSURL *)dstURL error:(NSError **)error
 {
 	// If the file is just renamed: perform a system rename, since this is safe against case sensitivity issues...
-	if ([itemURL.URLByDeletingLastPathComponent isEqualToFileURL: dstURL.URLByDeletingLastPathComponent]) {
+	if ([itemURL.URLByDeletingLastPathComponent ul_isEqualToFileURL:dstURL.URLByDeletingLastPathComponent]) {
 		if (rename([itemURL.path cStringUsingEncoding: NSUTF8StringEncoding], [dstURL.path cStringUsingEncoding: NSUTF8StringEncoding])) {
 			if (error) *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:nil];
 			return NO;

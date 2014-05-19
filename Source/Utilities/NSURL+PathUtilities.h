@@ -26,9 +26,9 @@
 
 /*!
  @abstract Compares the standardized paths of two URLs. Uses the correct case-sensitivity option depending on the file system of the URL.
- @discussion Compares URLs in a standardized manner. For performance reason, the URL should be created by URLByFastStandardizingPath if multiple comparison are to be expected. It is not required that the URL references an existing file.
+ @discussion Compares URLs in a standardized manner. For performance reason, the URL should be created by ul_URLByFastStandardizingPath if multiple comparison are to be expected. It is not required that the URL references an existing file.
  */
-- (BOOL)isEqualToFileURL:(NSURL *)otherURL;
+- (BOOL)ul_isEqualToFileURL:(NSURL *)otherURL;
 
 
 #pragma mark - Fast URL standardizing
@@ -36,13 +36,13 @@
 /*!
  @abstract Creates a standardized variant of an URL that uses the exact filename casing stored on disk.
  */
-- (NSURL *)URLByResolvingExactFilenames;
+- (NSURL *)ul_URLByResolvingExactFilenames;
 
 /*!
  @abstract Creates a standardized variant of an URL.
  @discussion To improve standardization performance, this method will mark the URL as standardized for its entire lifetime. Further standardization will thus result in the same path.
  */
-- (NSURL *)URLByFastStandardizingPath;
+- (NSURL *)ul_URLByFastStandardizingPath;
 
 
 #pragma mark - URL cache surpassing
@@ -50,12 +50,12 @@
 /*!
  @abstract Provides access to the given resource values by surpassing the URL cache.
  */
-- (NSDictionary *)uncachedResourceValuesForKeys:(NSArray *)keys error:(NSError **)error;
+- (NSDictionary *)ul_uncachedResourceValuesForKeys:(NSArray *)keys error:(NSError **)error;
 
 /*!
  @abstract Provides access to the given resource value by surpassing the URL cache.
  */
-- (id)uncachedResourceValueForKey:(NSString *)key error:(NSError **)error;
+- (id)ul_uncachedResourceValueForKey:(NSString *)key error:(NSError **)error;
 
 
 #pragma mark - Attribute queries
@@ -64,12 +64,12 @@
  @abstract Provides the most recent file modification date.
  @discussion This method ensures to provide the most recent date by surpassing the URL resource value cache.
  */
-- (NSDate *)fileModificationDate;
+- (NSDate *)ul_fileModificationDate;
 
 /*!
  @abstract Provides a dictionary with URL properties that should be preserved when rewriting, moving or copying a file.
  @discussion Currently, this is only the file creation date.
  */
-- (NSDictionary *)preservableFileAttributes;
+- (NSDictionary *)ul_preservableFileAttributes;
 
 @end

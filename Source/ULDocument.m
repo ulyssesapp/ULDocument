@@ -188,7 +188,7 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 		if (_fileURL == fileURL || [_fileURL isEqual: fileURL])
 			return;
 		
-		_fileURL = [[fileURL copy] URLByResolvingExactFilenames];
+		_fileURL = [[fileURL copy] ul_URLByResolvingExactFilenames];
 	}
 	
 	if (self.documentIsOpen)
@@ -415,7 +415,7 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 	
 	[self getChangeTokenURLAttributes:&urlAttributes versionIdentifier:&versionIdentifier];
 
-	NSDictionary *resourceValues = [documentURL uncachedResourceValuesForKeys:urlAttributes error:&error];
+	NSDictionary *resourceValues = [documentURL ul_uncachedResourceValuesForKeys:urlAttributes error:&error];
 	
 	// Report any errors. Prevent search index corruption by creating random tokens on error
 	if (!resourceValues) {
@@ -659,7 +659,7 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 - (void)revertToContentsOfURL:(NSURL *)url completionHandler:(void (^)(BOOL success))completionHandler
 {
 	// No duplicate reverts to the same URL
-	if ([self.revertURL isEqualToFileURL: url])
+	if ([self.revertURL ul_isEqualToFileURL:url])
 		return;
 	else
 		NSAssert(!self.revertURL, @"Document is currently being reverted to URL %@, but second request to revert to %@ was issued!", self.revertURL, url);
@@ -727,7 +727,7 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 	[self updateChangeCount: ULDocumentChangeCleared];
 	
 	// Read change date and current version
-	NSDate *fileDate = url.fileModificationDate;
+	NSDate *fileDate = url.ul_fileModificationDate;
 	self.fileModificationDate = fileDate;
 	self.fileChangeToken = [self.class changeTokenForItemAtURL: url];
 	self.changeToken = self.fileChangeToken;
@@ -784,17 +784,17 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 	__block BOOL success = NO;
 	
 	// Only standardize URL, do not resolve exact filename since filename's case may change
-	url = url.URLByFastStandardizingPath;
+	url = url.ul_URLByFastStandardizingPath;
 	
-	// Renaming and writing a file (use direct, standardized URL comparison to detect filename case changes, instead of -isEqualToFileURL:)
+	// Renaming and writing a file (use direct, standardized URL comparison to detect filename case changes, instead of -ul_isEqualToFileURL:)
 	if ((saveOperation == ULDocumentSave || saveOperation == ULDocumentAutosave) && ![url isEqual: self.fileURL] && [self.fileURL checkResourceIsReachableAndReturnError: NULL]) {
 		NSFileCoordinator *coordinator = [[NSFileCoordinator alloc] initWithFilePresenter: _presenter];
 		__block NSURL *movedURL;
 		__block NSError *operationError;
 		
 		ULNoticeBeginURL(self.fileURL);
-		[coordinator coordinateMovingItemAtURL:self.fileURL toURL:url error:&localError byAccessor:^(NSURL *currentURL, NSURL *newURL) {
 
+		[coordinator ul_coordinateMovingItemAtURL:self.fileURL toURL:url error:&localError byAccessor:^(NSURL *currentURL, NSURL *newURL) {
 			// File has been deleted externally
 			if (_deletionPending) {
 				operationError = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey: @"Deletion pending."}];
@@ -802,7 +802,7 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 			}
 
 			// Move old file, if URL is about to change
-			if (![NSFileManager.defaultManager moveItemCaseSensistiveAtURL:currentURL toURL:newURL error:&operationError]) {
+			if (![NSFileManager.defaultManager ul_moveItemCaseSensistiveAtURL:currentURL toURL:newURL error:&operationError]) {
 				success = NO;
 				return;
 			}
@@ -810,7 +810,7 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 			[coordinator itemAtURL:currentURL didMoveToURL:newURL];
 
 			// Resolve to exact URL
-			movedURL = newURL.URLByResolvingExactFilenames;
+			movedURL = newURL.ul_URLByResolvingExactFilenames;
 
 			self.fileURL = movedURL;
 
@@ -862,7 +862,7 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 - (BOOL)coordinatedSaveToURL:(NSURL *)url forSaveOperation:(ULDocumentSaveOperation)saveOperation error:(NSError **)outError
 {
 	id lastChangeToken = self.changeToken;
-	NSDictionary *preservedAttributes = self.fileURL.preservableFileAttributes;
+	NSDictionary *preservedAttributes = self.fileURL.ul_preservableFileAttributes;
 	
 	// Perform safe write
 	BOOL success = [self writeSafelyToURL:url forSaveOperation:saveOperation error:outError];
@@ -893,7 +893,7 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 	
 	// Make sure that file modification date is updated to the new timestamp (the actual file modification happened before getting a unique time stamp...)
 	[url setResourceValue:[NSDate new] forKey:NSURLContentModificationDateKey error:NULL];
-	self.fileModificationDate = url.fileModificationDate;
+	self.fileModificationDate = url.ul_fileModificationDate;
 	
 	// Update change token to persisted state. This ensures that stale -presentedItemDidChange notifications will not revert changes happen in memory while saving the file.
 	self.fileChangeToken = [self.class changeTokenForItemAtURL: url];
@@ -964,7 +964,7 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 		
 		switch (saveOperation) {
 			case ULDocumentSave:
-				shouldAddVersion = (self.changeDate && [self.changeDate.dateWithFilesystemPrecision timeIntervalSinceDate: self.fileModificationDate] > 0);
+				shouldAddVersion = (self.changeDate && [self.changeDate.ul_dateWithFilesystemPrecision timeIntervalSinceDate: self.fileModificationDate] > 0);
 				break;
 				
 			case ULDocumentAutosave:
@@ -1109,7 +1109,7 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 
 - (void)presentedItemDidMoveToURL:(NSURL *)newURL
 {
-	self.fileURL = newURL.URLByResolvingExactFilenames;
+	self.fileURL = newURL.ul_URLByResolvingExactFilenames;
 	
 	// Notify on document change if change token has been changed
 	if (![self.changeToken isEqual: [self.class changeTokenForItemAtURL: newURL]])
@@ -1131,7 +1131,7 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 		ULNoticeBeginURL(strongSelf.fileURL);
 		
 		[[[NSFileCoordinator alloc] initWithFilePresenter: strongSelf->_presenter] coordinateReadingItemAtURL:strongSelf.fileURL options:NSFileCoordinatorReadingWithoutChanges error:NULL byAccessor:^(NSURL *newURL) {
-			newURL = newURL.URLByResolvingExactFilenames;
+			newURL = newURL.ul_URLByResolvingExactFilenames;
 			
 			// Item seems to be still reachable
 			if ([newURL checkResourceIsReachableAndReturnError: NULL]) {
@@ -1139,7 +1139,7 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 				//  - current state in memory is not based upon latest state on disk (tested through fileChangeToken)
 				//	- must not be the *same* date, but may be *older* if an older file is reverted!
 				//	- recognize URL changes that have not been notified as move, since file presentation doesn't notify filename case changes properly...
-				if (strongSelf.documentIsOpen && !([strongSelf.fileChangeToken isEqual: [self.class changeTokenForItemAtURL: newURL]] && [self.fileURL.URLByFastStandardizingPath isEqual: newURL]))
+				if (strongSelf.documentIsOpen && !([strongSelf.fileChangeToken isEqual: [self.class changeTokenForItemAtURL: newURL]] && [self.fileURL.ul_URLByFastStandardizingPath isEqual:newURL]))
 					[strongSelf revertToContentsOfURL:newURL completionHandler: nil];
 			}
 			

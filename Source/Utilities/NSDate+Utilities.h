@@ -27,6 +27,6 @@
 /*!
  @abstract Rounds a date value down on seconds, so it is compatible with file system meta data.
  */
-- (NSDate *)dateWithFilesystemPrecision;
+- (NSDate *)ul_dateWithFilesystemPrecision;
 
 @end

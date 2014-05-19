@@ -31,7 +31,7 @@ void *NSURLCachedStandardizedPathKey		= "NSURLCachedStandardizedPathKey";
 
 @implementation NSURL (PathUtilities)
 
-- (BOOL)isCaseSensitiveFileURL
+- (BOOL)ul_isCaseSensitiveFileURL
 {
 	// Prefer cached value if possible
 	NSNumber *isCaseSensitive = objc_getAssociatedObject(self, NSURLCachedIsCaseSensitiveFileURLKey);
@@ -55,11 +55,11 @@ void *NSURLCachedStandardizedPathKey		= "NSURLCachedStandardizedPathKey";
 	return isCaseSensitive.boolValue;
 }
 
-- (NSURL *)URLByFastStandardizingPath
+- (NSURL *)ul_URLByFastStandardizingPath
 {
 	NSAssert(self.isFileURL, @"Cannot standardize non-file URLs");
 	
-	NSString *cachedStandardizedPath = self.cachedStandardizedPath;
+	NSString *cachedStandardizedPath = self.ul_cachedStandardizedPath;
 	
 	NSURL *url = [NSURL fileURLWithPath: cachedStandardizedPath];
 	objc_setAssociatedObject(url, NSURLCachedStandardizedPathKey, cachedStandardizedPath, OBJC_ASSOCIATION_RETAIN);
@@ -67,7 +67,7 @@ void *NSURLCachedStandardizedPathKey		= "NSURLCachedStandardizedPathKey";
 	return url;
 }
 
-- (NSString *)cachedStandardizedPath
+- (NSString *)ul_cachedStandardizedPath
 {
 	NSAssert(self.isFileURL, @"Cannot standardize non-file URLs");
 	
@@ -83,24 +83,24 @@ void *NSURLCachedStandardizedPathKey		= "NSURLCachedStandardizedPathKey";
 	return path;
 }
 
-- (BOOL)isEqualToFileURL:(NSURL *)otherURL
+- (BOOL)ul_isEqualToFileURL:(NSURL *)otherURL
 {
 	NSParameterAssert(self.isFileURL);
 	if (!otherURL)
 		return NO;
 	
 	// Use case-sensitive compare if at least one URL is on a case-sensitive FS
-	NSStringCompareOptions compareOption = self.isCaseSensitiveFileURL ? 0 : NSCaseInsensitiveSearch;
-	return ([self.cachedStandardizedPath compare:otherURL.cachedStandardizedPath options:compareOption] == NSOrderedSame);
+	NSStringCompareOptions compareOption = self.ul_isCaseSensitiveFileURL ? 0 : NSCaseInsensitiveSearch;
+	return ([self.ul_cachedStandardizedPath compare:otherURL.ul_cachedStandardizedPath options:compareOption] == NSOrderedSame);
 }
 
-- (NSURL *)URLByResolvingExactFilenames
+- (NSURL *)ul_URLByResolvingExactFilenames
 {
 	NSParameterAssert(self.isFileURL);
 	
 	// Skip on case-sensistive FS
-	if (self.isCaseSensitiveFileURL)
-		return self.URLByFastStandardizingPath;
+	if (self.ul_isCaseSensitiveFileURL)
+		return self.ul_URLByFastStandardizingPath;
 	
 	// Need to re-instantiate URL to clean any stale URL caches and bookmark data
 	NSDictionary *pathInfo = [[NSURL fileURLWithPath: self.path] resourceValuesForKeys:@[NSURLParentDirectoryURLKey, NSURLNameKey] error:NULL];
@@ -108,13 +108,13 @@ void *NSURLCachedStandardizedPathKey		= "NSURLCachedStandardizedPathKey";
 		return self;
 	
 	// Build path from properties with correct casing and standardize again, since NSURLParentDirectoryURLKey may not provide a standardized path...
-	return [[pathInfo[NSURLParentDirectoryURLKey] URLByAppendingPathComponent: pathInfo[NSURLNameKey]] URLByFastStandardizingPath];
+	return [[pathInfo[NSURLParentDirectoryURLKey] URLByAppendingPathComponent:pathInfo[NSURLNameKey]] ul_URLByFastStandardizingPath];
 }
 
 
 #pragma mark - URL cache surpassing
 
-- (NSDictionary *)uncachedResourceValuesForKeys:(NSArray *)keys error:(NSError **)outError
+- (NSDictionary *)ul_uncachedResourceValuesForKeys:(NSArray *)keys error:(NSError **)outError
 {
 #if !TARGET_OS_IPHONE
 	if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_8) {
@@ -141,20 +141,20 @@ void *NSURLCachedStandardizedPathKey		= "NSURLCachedStandardizedPathKey";
 #endif
 }
 
-- (id)uncachedResourceValueForKey:(NSString *)key error:(NSError *__autoreleasing *)error
+- (id)ul_uncachedResourceValueForKey:(NSString *)key error:(NSError **)error
 {
-	return [self uncachedResourceValuesForKeys:@[key] error:error][key];
+	return [self ul_uncachedResourceValuesForKeys:@[key] error:error][key];
 }
 
 
 #pragma mark - Attribute access
 
-- (NSDate *)fileModificationDate
+- (NSDate *)ul_fileModificationDate
 {
-	return [self uncachedResourceValueForKey:NSURLContentModificationDateKey error:NULL];
+	return [self ul_uncachedResourceValueForKey:NSURLContentModificationDateKey error:NULL];
 }
 
-- (NSDictionary *)preservableFileAttributes
+- (NSDictionary *)ul_preservableFileAttributes
 {
 	// We may not flush the URL cache, since NSFileVersion seems to rely on exact instances somehow (ULDocumentTest -testVersionAutocreation will fail)
 	return [self resourceValuesForKeys:@[NSURLCreationDateKey] error:NULL];

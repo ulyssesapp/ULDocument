@@ -26,7 +26,7 @@
 
 @implementation NSDate (Utilities)
 
-- (NSDate *)dateWithFilesystemPrecision
+- (NSDate *)ul_dateWithFilesystemPrecision
 {
 	return [NSDate dateWithTimeIntervalSince1970: (NSInteger)self.timeIntervalSince1970];
 }
