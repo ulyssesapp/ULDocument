@@ -160,7 +160,7 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 
 - (void)dealloc
 {
-    self.undoManager = nil;
+	self.undoManager = nil;
 
 	[_presenter endPresentation];
 }
@@ -793,25 +793,25 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 		__block NSError *operationError;
 		
 		ULNoticeBeginURL(self.fileURL);
-		
 		[coordinator coordinateMovingItemAtURL:self.fileURL toURL:url error:&localError byAccessor:^(NSURL *currentURL, NSURL *newURL) {
+
 			// File has been deleted externally
 			if (_deletionPending) {
 				operationError = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey: @"Deletion pending."}];
 				return;
 			}
-			
+
 			// Move old file, if URL is about to change
 			if (![NSFileManager.defaultManager moveItemCaseSensistiveAtURL:currentURL toURL:newURL error:&operationError]) {
 				success = NO;
 				return;
 			}
-			
+
 			[coordinator itemAtURL:currentURL didMoveToURL:newURL];
-			
+
 			// Resolve to exact URL
 			movedURL = newURL.URLByResolvingExactFilenames;
-			
+
 			self.fileURL = movedURL;
 
 			// File has been deleted externally
@@ -820,7 +820,7 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 				success = NO;
 				return;
 			}
-			
+
 			// Write wrapper
 			success = [self coordinatedSaveToURL:movedURL forSaveOperation:saveOperation error:&operationError];
 			[self didChangeFileURLBySaving];
@@ -927,8 +927,8 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 	
 	// Create temporary folder
 	NSURL *temporaryFolderURL = [fileManager URLForDirectory:NSItemReplacementDirectory inDomain:NSUserDomainMask appropriateForURL:url create:YES error:outError];
-    if (!temporaryFolderURL)
-        return NO;
+	if (!temporaryFolderURL)
+		return NO;
 
 	// Create URL for temporary file
 	NSURL *temporaryFileURL = [temporaryFolderURL URLByAppendingPathComponent: url.lastPathComponent];
@@ -937,17 +937,17 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 	// Note: We copy it, since some applications would lose track of the file when moving it away. (e.g. TextEdit)
 	if ([url checkResourceIsReachableAndReturnError: NULL]) {
 		// Fast path: Try hard linking first
-        if (![fileManager linkItemAtURL:url toURL:temporaryFileURL error:NULL]) {
-            // Linking failed: remove if anything has been generated while linking (e.g. empty folders, see ULYSSES-2533)
-            [fileManager removeItemAtURL:temporaryFileURL error:NULL];
+		if (![fileManager linkItemAtURL:url toURL:temporaryFileURL error:NULL]) {
+			// Linking failed: remove if anything has been generated while linking (e.g. empty folders, see ULYSSES-2533)
+			[fileManager removeItemAtURL:temporaryFileURL error:NULL];
 			
-            // Slow path: make a full copy.
-            if (![fileManager copyItemAtURL:url toURL:temporaryFileURL error:outError]) {
+			// Slow path: make a full copy.
+			if (![fileManager copyItemAtURL:url toURL:temporaryFileURL error:outError]) {
 				// Copying failed: remove entire temporary folder
-                [fileManager removeItemAtURL:temporaryFolderURL error:NULL];
-                return NO;
-            }
-        }
+				[fileManager removeItemAtURL:temporaryFolderURL error:NULL];
+				return NO;
+			}
+		}
 	}
 	
 	// Write new version to location
