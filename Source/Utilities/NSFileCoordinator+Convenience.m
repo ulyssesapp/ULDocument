@@ -28,7 +28,7 @@
 
 @implementation NSFileCoordinator (Convenience)
 
-- (void)ul_coordinateMovingItemAtURL:(NSURL *)url toURL:(NSURL *)newURL error:(NSError **)outError byAccessor:(void (^)(NSURL *oldURL, NSURL *newURL))writer
+- (BOOL)ul_coordinateMovingItemAtURL:(NSURL *)url toURL:(NSURL *)newURL error:(NSError **)outError byAccessor:(void (^)(NSURL *oldURL, NSURL *newURL))writer
 {
 	[self coordinateWritingItemAtURL:url options:NSFileCoordinatorWritingForMoving writingItemAtURL:newURL options:0 error:outError byAccessor:^(NSURL *oldURL, NSURL *coordinatedNewURL) {
 		// New URL equivalent beside filename case: use originally passed version of new URL
@@ -39,6 +39,8 @@
 		else
 			writer(oldURL, coordinatedNewURL);
 	}];
+	
+	return (!outError || *outError == nil);
 }
 
 @end

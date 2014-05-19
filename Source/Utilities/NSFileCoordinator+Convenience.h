@@ -31,6 +31,6 @@
  @abstract Coordinates a rename operation of a filename while keeping the case of a filename intact.
  @discussion The caller needs to notify the file coordinator using -itemAtURL:didMoveToURL: before completing the block.
  */
-- (void)ul_coordinateMovingItemAtURL:(NSURL *)url toURL:(NSURL *)newURL error:(NSError **)outError byAccessor:(void (^)(NSURL *oldURL, NSURL *newURL))writer;
+- (BOOL)ul_coordinateMovingItemAtURL:(NSURL *)url toURL:(NSURL *)newURL error:(NSError **)outError byAccessor:(void (^)(NSURL *oldURL, NSURL *newURL))writer;
 
 @end
