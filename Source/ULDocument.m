@@ -645,6 +645,7 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 
 - (void)close
 {
+	[_presenter endPresentation];
 	_presenter = nil;
 	
 	// Deactivate autosave observers. Do it on _autosaveQueue to prevent race conditions.
