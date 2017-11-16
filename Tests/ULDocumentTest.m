@@ -1357,6 +1357,25 @@ NSString *kTestText3	= @"Fusce tincidunt erat sit amet magna porttitor nec iacul
 	XCTAssertEqualObjects(documentReadOnly.fileModificationDate, fileChange, @"Change date should not change");
 }
 
+- (void)testClosedDocumentsShouldRemoveFilePresentersFromNSFileCoordinator {
+	NSURL *url = [self createTestDocument];
+
+	ULTestDocument *document = [[ULTestDocument alloc] initWithFileURL:url readOnly:NO];
+	XCTestExpectation *expectation = [self expectationWithDescription:NSStringFromSelector(_cmd)];
+	[document openWithCompletionHandler:^(BOOL success) {
+		XCTAssertTrue([NSFileCoordinator filePresenters].count == 1);
+		XCTAssertTrue(success, @"Can't open document");
+	}];
+
+	[document closeWithCompletionHandler:^(BOOL success) {
+		XCTAssertTrue([NSFileCoordinator filePresenters].count == 0, @"File presenter not removed.");
+		[expectation fulfill];
+	}];
+
+	[self waitForExpectationsWithTimeout:2 handler:^(NSError * _Nullable error) {
+		NSLog(@"Error waiting for expectation: %@", error);
+	}];
+}
 
 #if !TARGET_OS_IPHONE
 - (void)testVersionPreservation
