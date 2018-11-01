@@ -1,7 +1,7 @@
 //
 //	ULFilePresentationProxy.m
 //
-//  Copyright (c) 2014 The Soulmen GbR
+//  Copyright © 2018 Ulysses GmbH & Co. KG
 //
 //	Permission is hereby granted, free of charge, to any person obtaining a copy
 //	of this software and associated documentation files (the "Software"), to deal
@@ -23,15 +23,22 @@
 //
 
 #import "ULFilePresentationProxy.h"
+#import "ULWeakify.h"
 
-@implementation ULFilePresentationProxy
+@interface ULFilePresentationProxy ()
 {
 	NSOperationQueue			*_queue;
-	__weak id<NSFilePresenter>	_owner;
 	NSURL						*_url;
+	
+	id			_deactivationHandler;
+	id			_activationHandler;
 }
 
-- (ULFilePresentationProxy *)initWithOwner:(id<NSFilePresenter>)owner
+@end
+
+@implementation ULFilePresentationProxy
+
+- (instancetype)initWithOwner:(id<ULFilePresentationProxyOwner>)owner
 {
 	NSParameterAssert(owner);
 	
@@ -49,24 +56,53 @@
 
 #pragma mark - Owner management
 
-- (id<NSFilePresenter>)owner
-{
-	return _owner;
-}
-
 - (void)beginPresentationOnURL:(NSURL *)url
 {
 	NSAssert(!_url, @"Presenter already initialized.");
 	
 	_url = url;
 	[NSFileCoordinator addFilePresenter: self];
+	
+#if TARGET_OS_IPHONE
+	[self setUpBackgroundHandling];
+#endif
 }
 
 - (void)endPresentation
 {
+	if (_deactivationHandler)
+		[NSNotificationCenter.defaultCenter removeObserver: _deactivationHandler];
+	if (_activationHandler)
+		[NSNotificationCenter.defaultCenter removeObserver: _activationHandler];
+	
 	_owner = nil;
 	[NSFileCoordinator removeFilePresenter: self];
 }
+
+#if TARGET_OS_IPHONE
+- (void)setUpBackgroundHandling
+{
+	// When entering background: Unregister presenter to prevent lockups with other apps
+	ULWeakifySelf
+	_deactivationHandler = [NSNotificationCenter.defaultCenter addObserverForName:UIApplicationDidEnterBackgroundNotification object:nil queue:NSOperationQueue.mainQueue usingBlock:^(NSNotification *note) {
+		ULStrongifySelfOrReturn
+		[NSFileCoordinator removeFilePresenter: self];
+	}];
+	
+	// When entering foreground: Re-register presenter and notify about potentially missed changes
+	_activationHandler = [NSNotificationCenter.defaultCenter addObserverForName:UIApplicationWillEnterForegroundNotification object:nil queue:NSOperationQueue.mainQueue usingBlock:^(NSNotification *note) {
+		ULStrongifySelfOrReturn
+		
+		[NSFileCoordinator addFilePresenter: self];
+		
+		// Notify about potentially missed changes
+		[self->_queue addOperationWithBlock:^{
+			ULStrongifySelfOrReturn
+			[self->_owner filePresentationProxyDidRestartPresentation: self];
+		}];
+	}];
+}
+#endif
 
 
 #pragma mark - Presenter properties
@@ -96,25 +132,25 @@
 
 - (void)presentedItemDidMoveToURL:(NSURL *)newURL
 {
-	__block id owner = _owner;
-
-	if (owner && [owner respondsToSelector: @selector(presentedItemDidMoveToURL:)])
-		[owner presentedItemDidMoveToURL: newURL];
+	@autoreleasepool {
+		__block id owner = _owner;
+	
+		if (owner && [owner respondsToSelector: @selector(presentedItemDidMoveToURL:)])
+			[owner presentedItemDidMoveToURL: newURL];
+	}
 	
 	// File presenters will stop to receive subitem notifications after moving the item. So we need to re-register presenters here.
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 		[self willChangeValueForKey: @"presentedItemURL"];
 		
 		[[[NSFileCoordinator alloc] initWithFilePresenter: self] coordinateReadingItemAtURL:newURL options:0 error:NULL byAccessor:^(NSURL *newURL) {
-			if (!_owner)
+			id owner = _owner;
+			if (!owner)
 				return;
-						
+			
 			[NSFileCoordinator removeFilePresenter: self];
 			_url = newURL;
 			[NSFileCoordinator addFilePresenter: self];
-			
-			// Just perform a bogus operation to ensure a reference to "owner" is kept. Otherwise a dealloc of _owner may occur, when removeFilePresenter: is called, which would deadlock.
-			[owner class];
 		}];
 		
 		[self didChangeValueForKey: @"presentedItemURL"];

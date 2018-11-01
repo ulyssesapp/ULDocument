@@ -1,5 +1,5 @@
 //
-//	NSDate+Utilities.h
+//  NSString+UniqueIdentifier.m
 //
 //  Copyright © 2018 Ulysses GmbH & Co. KG
 //
@@ -22,11 +22,22 @@
 //	THE SOFTWARE.
 //
 
-@interface NSDate (Utilities)
+#import "NSString+UniqueIdentifier.h"
 
-/*!
- @abstract Rounds a date value down on seconds, so it is compatible with file system meta data.
- */
-- (NSDate *)ul_dateWithFilesystemPrecision;
+@implementation NSString (UniqueIdentifier)
+
++ (NSString *)ul_newUniqueIdentifier
+{
+	// Pure UUID
+	CFUUIDRef uuid = CFUUIDCreate(NULL);
+	NSString *uuidString = (__bridge_transfer NSString *)CFUUIDCreateString(NULL, uuid);
+	CFRelease(uuid);
+	
+	// Remove dashes and make lowercase
+	uuidString = [uuidString stringByReplacingOccurrencesOfString:@"-" withString:@""];
+	uuidString = uuidString.lowercaseString;
+	
+	return uuidString;
+}
 
 @end

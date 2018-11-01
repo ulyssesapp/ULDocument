@@ -1,5 +1,5 @@
 //
-//	NSDate+Utilities.h
+//  NSString+UniqueIdentifier.h
 //
 //  Copyright © 2018 Ulysses GmbH & Co. KG
 //
@@ -22,11 +22,11 @@
 //	THE SOFTWARE.
 //
 
-@interface NSDate (Utilities)
+@interface NSString (UniqueIdentifier)
 
 /*!
- @abstract Rounds a date value down on seconds, so it is compatible with file system meta data.
+ @abstract Creates a unique identifier that can be used as key.
  */
-- (NSDate *)ul_dateWithFilesystemPrecision;
++ (NSString *)ul_newUniqueIdentifier;
 
 @end

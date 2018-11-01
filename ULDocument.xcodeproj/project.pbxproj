@@ -45,6 +45,14 @@
 		79AC7CFB1920CE3400103E36 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79AC7CFA1920CE3400103E36 /* XCTest.framework */; };
 		79AC7CFC1920CE3400103E36 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79AC7CE91920CE3300103E36 /* Cocoa.framework */; };
 		79AC7CFF1920CE3400103E36 /* ULDocument OS X.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 79AC7CE61920CE3300103E36 /* ULDocument OS X.dylib */; };
+		79DA601D218B4F390006285D /* ULDeadlockDetector.m in Sources */ = {isa = PBXBuildFile; fileRef = 79DA601B218B4F390006285D /* ULDeadlockDetector.m */; };
+		79DA601E218B4F390006285D /* ULDeadlockDetector.m in Sources */ = {isa = PBXBuildFile; fileRef = 79DA601B218B4F390006285D /* ULDeadlockDetector.m */; };
+		79DA601F218B4F390006285D /* ULDeadlockDetector.h in Headers */ = {isa = PBXBuildFile; fileRef = 79DA601C218B4F390006285D /* ULDeadlockDetector.h */; };
+		79DA6022218B4F4E0006285D /* NSString+UniqueIdentifier.h in Headers */ = {isa = PBXBuildFile; fileRef = 79DA6020218B4F4E0006285D /* NSString+UniqueIdentifier.h */; };
+		79DA6023218B4F4E0006285D /* NSString+UniqueIdentifier.m in Sources */ = {isa = PBXBuildFile; fileRef = 79DA6021218B4F4E0006285D /* NSString+UniqueIdentifier.m */; };
+		79DA6024218B4F4E0006285D /* NSString+UniqueIdentifier.m in Sources */ = {isa = PBXBuildFile; fileRef = 79DA6021218B4F4E0006285D /* NSString+UniqueIdentifier.m */; };
+		79DA6031218B59350006285D /* NSString+UniqueIdentifier.m in Sources */ = {isa = PBXBuildFile; fileRef = 79DA6021218B4F4E0006285D /* NSString+UniqueIdentifier.m */; };
+		79DA6032218B59350006285D /* NSString+UniqueIdentifier.m in Sources */ = {isa = PBXBuildFile; fileRef = 79DA6021218B4F4E0006285D /* NSString+UniqueIdentifier.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -108,6 +116,11 @@
 		79AC7CF91920CE3400103E36 /* ULDocument Tests Mac.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "ULDocument Tests Mac.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		79AC7CFA1920CE3400103E36 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		79AC7D151920D00A00103E36 /* ULDocumentTests-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "ULDocumentTests-Info.plist"; sourceTree = "<group>"; };
+		79DA601B218B4F390006285D /* ULDeadlockDetector.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ULDeadlockDetector.m; path = "../../../../Ulysses3/Ulysses 3/Source/Utilities/General/ULDeadlockDetector.m"; sourceTree = "<group>"; };
+		79DA601C218B4F390006285D /* ULDeadlockDetector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ULDeadlockDetector.h; path = "../../../../Ulysses3/Ulysses 3/Source/Utilities/General/ULDeadlockDetector.h"; sourceTree = "<group>"; };
+		79DA6020218B4F4E0006285D /* NSString+UniqueIdentifier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+UniqueIdentifier.h"; sourceTree = "<group>"; };
+		79DA6021218B4F4E0006285D /* NSString+UniqueIdentifier.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+UniqueIdentifier.m"; sourceTree = "<group>"; };
+		79DA602E218B57450006285D /* ULWeakify.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ULWeakify.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -161,10 +174,15 @@
 				7917C4551920D19C00E57657 /* NSFileCoordinator+Convenience.m */,
 				7917C4561920D19C00E57657 /* NSFileManager+FilesystemConvenience.h */,
 				7917C4571920D19C00E57657 /* NSFileManager+FilesystemConvenience.m */,
+				79DA6020218B4F4E0006285D /* NSString+UniqueIdentifier.h */,
+				79DA6021218B4F4E0006285D /* NSString+UniqueIdentifier.m */,
 				7917C4581920D19C00E57657 /* NSURL+PathUtilities.h */,
 				7917C4591920D19C00E57657 /* NSURL+PathUtilities.m */,
+				79DA601C218B4F390006285D /* ULDeadlockDetector.h */,
+				79DA601B218B4F390006285D /* ULDeadlockDetector.m */,
 				7917C4421920D07B00E57657 /* ULFilePresentationProxy.h */,
 				7917C4431920D07B00E57657 /* ULFilePresentationProxy.m */,
+				79DA602E218B57450006285D /* ULWeakify.h */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -278,8 +296,10 @@
 			files = (
 				7917C45A1920D19C00E57657 /* NSFileCoordinator+Convenience.h in Headers */,
 				7917C4521920D19500E57657 /* NSDate+Utilities.h in Headers */,
+				79DA6022218B4F4E0006285D /* NSString+UniqueIdentifier.h in Headers */,
 				7987E5CC1920FB360073FA6B /* ULDocument-Mac-Prefix.pch in Headers */,
 				7917C4441920D07B00E57657 /* ULFilePresentationProxy.h in Headers */,
+				79DA601F218B4F390006285D /* ULDeadlockDetector.h in Headers */,
 				7917C4721920DA4900E57657 /* ULDocument_Subclassing.h in Headers */,
 				7917C45C1920D19C00E57657 /* NSFileManager+FilesystemConvenience.h in Headers */,
 				7917C45E1920D19C00E57657 /* NSURL+PathUtilities.h in Headers */,
@@ -372,9 +392,6 @@
 					7917C4D11920F6D300E57657 = {
 						TestTargetID = 79AC7CE51920CE3300103E36;
 					};
-					79AC7CF81920CE3400103E36 = {
-						TestTargetID = 79AC7CE51920CE3300103E36;
-					};
 				};
 			};
 			buildConfigurationList = 79AC7CE11920CE3300103E36 /* Build configuration list for PBXProject "ULDocument" */;
@@ -422,7 +439,9 @@
 				7917C4E81920F6EB00E57657 /* NSDate+Utilities.m in Sources */,
 				7917C4EB1920F6EB00E57657 /* NSURL+PathUtilities.m in Sources */,
 				7917C4EC1920F6EB00E57657 /* ULFilePresentationProxy.m in Sources */,
+				79DA6024218B4F4E0006285D /* NSString+UniqueIdentifier.m in Sources */,
 				7917C4EA1920F6EB00E57657 /* NSFileManager+FilesystemConvenience.m in Sources */,
+				79DA601E218B4F390006285D /* ULDeadlockDetector.m in Sources */,
 				7917C4E71920F6EB00E57657 /* ULDocument.m in Sources */,
 				7917C4E91920F6EB00E57657 /* NSFileCoordinator+Convenience.m in Sources */,
 			);
@@ -438,6 +457,7 @@
 				7987E5D21920FE100073FA6B /* NSFileManager+FilesystemConvenience.m in Sources */,
 				791F30F61920F79500771735 /* ULDocumentTest.m in Sources */,
 				7987E5D11920FE100073FA6B /* NSFileCoordinator+Convenience.m in Sources */,
+				79DA6031218B59350006285D /* NSString+UniqueIdentifier.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -448,7 +468,9 @@
 				7917C4451920D07B00E57657 /* ULFilePresentationProxy.m in Sources */,
 				7917C44B1920D08200E57657 /* ULDocument.m in Sources */,
 				7917C45D1920D19C00E57657 /* NSFileManager+FilesystemConvenience.m in Sources */,
+				79DA6023218B4F4E0006285D /* NSString+UniqueIdentifier.m in Sources */,
 				7917C4531920D19500E57657 /* NSDate+Utilities.m in Sources */,
+				79DA601D218B4F390006285D /* ULDeadlockDetector.m in Sources */,
 				7917C45B1920D19C00E57657 /* NSFileCoordinator+Convenience.m in Sources */,
 				7917C45F1920D19C00E57657 /* NSURL+PathUtilities.m in Sources */,
 			);
@@ -458,6 +480,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				79DA6032218B59350006285D /* NSString+UniqueIdentifier.m in Sources */,
 				7917C47F1920DF3400E57657 /* XCTestCase+TestExtensions.m in Sources */,
 				7917C4761920DD9B00E57657 /* ULDocumentTest.m in Sources */,
 			);
@@ -492,7 +515,7 @@
 					"DEBUG=1",
 					"$(inherited)",
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -509,7 +532,7 @@
 				DYLIB_CURRENT_VERSION = "";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Source/Other/ULDocument-iOS-Prefix.pch";
-				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -535,7 +558,6 @@
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = "Tests/Other/ULDocumentTests-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				TEST_HOST = "";
@@ -556,7 +578,6 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Source/Other/ULDocument-iOS-Prefix.pch";
 				INFOPLIST_FILE = "Tests/Other/ULDocumentTests-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				TEST_HOST = "";
@@ -597,7 +618,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 			};
@@ -630,7 +651,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -660,7 +681,6 @@
 		79AC7D0E1920CE3400103E36 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/ULDocument OS X.dylib";
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(DEVELOPER_FRAMEWORKS_DIR)",
@@ -674,7 +694,6 @@
 				);
 				INFOPLIST_FILE = "Tests/Other/ULDocumentTests-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUNDLE_LOADER)";
 				WRAPPER_EXTENSION = xctest;
 			};
 			name = Debug;
@@ -682,7 +701,6 @@
 		79AC7D0F1920CE3400103E36 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/ULDocument OS X.dylib";
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(DEVELOPER_FRAMEWORKS_DIR)",
@@ -692,7 +710,6 @@
 				GCC_PREFIX_HEADER = "Source/Other/ULDocument-Mac-Prefix.pch";
 				INFOPLIST_FILE = "Tests/Other/ULDocumentTests-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUNDLE_LOADER)";
 				WRAPPER_EXTENSION = xctest;
 			};
 			name = Release;

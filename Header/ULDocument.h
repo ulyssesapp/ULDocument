@@ -1,7 +1,7 @@
 //
-//	ULDocument.h
+//  ULDocument.h
 //
-//  Copyright (c) 2014 The Soulmen GbR
+//  Copyright © 2018 Ulysses GmbH & Co. KG
 //
 //	Permission is hereby granted, free of charge, to any person obtaining a copy
 //	of this software and associated documentation files (the "Software"), to deal
@@ -71,6 +71,12 @@ extern NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey;
  @discussion Defaults to 30 seconds.
  */
 + (void)setAutosaveDelay:(NSTimeInterval)delay;
+
+/*!
+ @abstract Allows clients to globally configure the delay of autosave operations for ubiquitous items.
+ @discussion Defaults to 60 seconds.
+ */
++ (void)setUbiquitousItemAutosaveDelay:(NSTimeInterval)delay;
 
 /*!
  @abstract Allows clients to globally configure the minimum time between automatically generated document version.
@@ -161,7 +167,7 @@ extern NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey;
 
 /*!
  @abstract Saves the document's current state to the fileURL.
- @discussion This method does usually not have to called directly. The completionHandler will be called on a background queue. Passes NO to the completion handler, if an error occured. The error code will be set to lastWriteError. If an error occurs and no completion handler is provided a ULDocumentUnhandeledSaveErrorNotification is posted.
+ @discussion This method does usually not have to called directly. The completionHandler will be called on a background queue. Passes NO to the completion handler, if an error occured. The error code will be set to lastWriteError. If an error occurs and no completion handler is provided a ULDocumentUnhandeledSaveErrorNotification is posted. Autosave is only performed if hasUnsavedChanges returns YES.
  */
 - (void)autosaveWithCompletionHandler:(void (^)(BOOL success))completionHandler;
 
@@ -215,6 +221,12 @@ extern NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey;
  */
 - (BOOL)coordinatedSaveToURL:(NSURL *)url forSaveOperation:(ULDocumentSaveOperation)saveOperation error:(NSError **)outError;
 
+/*!
+ @abstract Replaces the document on disk with the contents of a file version at the passed URL and reverts the documents contents to it.
+ @discussion The completionHandler will be called on a background queue.
+ */
+- (void)replaceWithFileVersion:(NSFileVersion *)version completionHandler:(void (^)(BOOL success))completionHandler;
+
 
 #pragma mark - Change Management
 
@@ -231,7 +243,7 @@ extern NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey;
 
 /*!
  @abstract A token representing the latest state of the document.
- @discussion Will change whenever the document is modified or persisted. Thus, it can be used to identify persisted versions of the document as well as in-memory versions. Tokens can be compared using -isEqual:. They also implement NSCoding and NSCopying.
+ @discussion Will change whenever the document is modified or persisted. Thus, it can be used to identify persisted versions of the document as well as in-memory versions. Tokens can be compared using -isEqual:. They also implement NSCoding and NSCopying. The change token will normally updated after persisting the document to reflect the consistency with the contents stored to disk and the contents in memory. However, if a file format cannot be consistently re-read from disk (e.g. because it must be exported to a lossy or incompatible file format), the change token will not be updated. See -usesConsistentPersistenceFormat.  
  */
 @property(readonly) id changeToken;
 
@@ -241,17 +253,10 @@ extern NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey;
  */
 + (id)changeTokenForItemAtURL:(NSURL *)documentURL;
 
-
-#pragma mark - Conflict managment
-
 /*!
- @abstract The current file versions of the document.
+ @abstract Whether or not the persistent contents are consistent with the in-memory representation of the document.
+ @discussion Defaults to YES. Overwrite this method to returning NO, if the documents content might differ after writing and re-reading the document again (this might be the case for compatibility file formats or file formats with lossy compression). If this method returns NO, the documents changeToken will not change to the persistent change token after writing a file to reflect potential differences between in-memory and on-disk contents.
  */
-@property(readonly) NSFileVersion *currentVersion;
-
-/*!
- @abstract Contains all currently conflicting versions (NSFileVersion) of the document.
- */
-@property(readonly) NSArray *conflictVersions;
++ (BOOL)usesConsistentPersistenceFormat;
 
 @end

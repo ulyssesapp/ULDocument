@@ -1,7 +1,7 @@
 //
 //	ULFilePresentationProxy.h
 //
-//  Copyright (c) 2014 The Soulmen GbR
+//  Copyright © 2018 Ulysses GmbH & Co. KG
 //
 //	Permission is hereby granted, free of charge, to any person obtaining a copy
 //	of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +22,10 @@
 //	THE SOFTWARE.
 //
 
+@protocol ULFilePresentationProxyOwner;
+
+NS_ASSUME_NONNULL_BEGIN
+
 /*!
  @abstract Simple object that proxies file presentation messages.
  @discussion Use this object to avoid the owner being retained by the file coordination system. Clients must make sure the usage is ended when owner goes away!
@@ -32,7 +36,7 @@
  @abstract Initializes the proxy for a certain object. The owner must be weakly referencable.
  @discussion The file presentation proxy is still inactive after initialization. To activate it, use -beginPresentationOnURL:.
  */
-- (ULFilePresentationProxy *)initWithOwner:(id<NSFilePresenter>)owner;
+- (instancetype)initWithOwner:(id<ULFilePresentationProxyOwner>)owner;
 
 /*!
  @abstract Activates the file presentation proxy on a certain URL.
@@ -49,6 +53,27 @@
 /*!
  @abstract The owner of the proxy.
  */
-@property(readonly, weak) id<NSFilePresenter> owner;
+@property(readonly, weak) id<ULFilePresentationProxyOwner> owner;
 
 @end
+
+
+/*!
+ @abstract The delegate of a file presentation proxy
+ @discussion The delegate must conform to NSFilePresenter. However, -presentedItemURL and -presentedItemOperationQueue can be implemented with dummy implementations.
+ */
+@protocol ULFilePresentationProxyOwner <NSFilePresenter>
+
+#if TARGET_OS_IPHONE
+
+/*!
+ @abstract Notifies the owner that the file presenter was re-registered and therefore some changes might not have been notified.
+ @discussion This method is called after leaving background mode and the presenter was re-installed. Typically, the presented file should be rescanned for changes. Directory presenters should also rescan the entire folder hierarchy for any additions or deletions. 
+ */
+- (void)filePresentationProxyDidRestartPresentation:(ULFilePresentationProxy *)proxy;
+
+#endif
+
+@end
+
+NS_ASSUME_NONNULL_END

@@ -1,7 +1,7 @@
 //
 //  ULDocument.m
 //
-//  Copyright (c) 2014 The Soulmen GbR
+//  Copyright © 2018 Ulysses GmbH & Co. KG
 //
 //	Permission is hereby granted, free of charge, to any person obtaining a copy
 //	of this software and associated documentation files (the "Software"), to deal
@@ -25,21 +25,24 @@
 #import "ULDocument.h"
 #import "ULDocument_Subclassing.h"
 
+#import "ULDeadlockDetector.h"
 #import "ULFilePresentationProxy.h"
 
 #import "NSDate+Utilities.h"
 #import "NSFileCoordinator+Convenience.h"
 #import "NSFileManager+FilesystemConvenience.h"
+#import "NSString+UniqueIdentifier.h"
 #import "NSURL+PathUtilities.h"
 
 #import <objc/runtime.h>
 
 
 #ifndef ULError
-	#define ULError(...)				NSLog(__VA_ARGS__)
-	#define ULNotice(...)
-	#define ULNoticeBeginURL(...)
-	#define ULNoticeEndURL(...)
+#define ULError(...)				NSLog(__VA_ARGS__)
+#define ULLog(...)					NSLog(__VA_ARGS__)
+#define ULNotice(...)
+#define ULNoticeBeginURL(...)
+#define ULNoticeEndURL(...)
 #endif
 
 /*!
@@ -48,27 +51,36 @@
 static NSTimeInterval ULDocumentAutosaveDelay = 30.;
 
 /*!
+ @abstract The delay used by ULDocument instances for autosaving changes on ubiquitous stores.
+ */
+static NSTimeInterval ULDocumentUbiquitousAutosaveDelay = 60.;
+
+/*!
  @abstract The minimum interval used by ULDocument instances for automatic version generation.
  */
 static NSTimeInterval ULDocumentAutoversioningInterval = 900.;
+
+/*!
+ @abstract The maximum time a save operation may take until an error message is triggered on further save attempts.
+ */
+NSTimeInterval ULDocumentMaximumSaveDuration = 60.;
 
 
 NSString *ULDocumentUnhandeledSaveErrorNotification					= @"ULDocumentUnhandeledSaveErrorNotification";
 NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 
-@interface ULDocument () <NSFilePresenter>
+@interface ULDocument () <ULFilePresentationProxyOwner, ULDeadlockDetectorDelegate>
 {
 	id						_autosaveToken;							// Used to keep a document alive while autosave is pending
+	id						_resignActiveObserverToken;				// Observer token set for application resign notifications
+	id						_terminationObserverToken;				// Observer token set for application termination notifications
 	dispatch_queue_t		_autosaveQueue;							// A queue used to process and dequeue autosave operations
-
+	
 	BOOL					_deletionPending;						// Whether or not a deletion is pending
 	NSURL					*_fileURL;								// Write accessor for document's file URL
 	NSOperationQueue		*_interactionQueue;						// A queue used to process and synchronize all background document interactions
 	ULFilePresentationProxy	*_presenter;
 	NSUndoManager			*_undoManager;
-	
-	NSDate					*_lastWriteErrorDate;					// The change date of the sheet when the 'writeErrorNotificationChangeDate' was set. Used to detect duplicate notifications.
-	NSDate					*_lastVisibleErrorNotificationDate;		// Used to show errors again after 60s if unhandled.
 }
 
 @property NSInteger changeCount;
@@ -87,7 +99,9 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 @property(readwrite) id fileChangeToken;
 
 @property(readwrite) NSFileVersion *currentVersion;
-@property(readwrite) NSArray *conflictVersions;
+
+@property(readwrite) NSDate	*lastWriteErrorDate;					// The change date of the sheet when the 'writeErrorNotificationChangeDate' was set. Used to detect duplicate notifications.
+@property(readwrite) NSDate	*lastVisibleErrorNotificationDate;		// Used to show errors again after 60s if unhandled.
 
 @property(readwrite) NSError *lastReadError;
 @property(readwrite) NSError *lastWriteError;
@@ -117,6 +131,11 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 + (void)setAutosaveDelay:(NSTimeInterval)delay
 {
 	ULDocumentAutosaveDelay = delay;
+}
+
++ (void)setUbiquitousItemAutosaveDelay:(NSTimeInterval)delay
+{
+	ULDocumentUbiquitousAutosaveDelay = delay;
 }
 
 + (void)setAutoversioningInterval:(NSTimeInterval)interval
@@ -160,8 +179,7 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 
 - (void)dealloc
 {
-	self.undoManager = nil;
-
+    self.undoManager = nil;
 	[_presenter endPresentation];
 }
 
@@ -306,7 +324,7 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 		
 		BOOL success = [self saveToURL:url forSaveOperation:ULDocumentAutosave error:&error];
 		if (!success)
-			ULError(@"Error writing file: %@ Path: %@", error.localizedDescription, url.path);
+			ULError(@"Error writing file: %@ Path: %@", error, url.path);
 	}
 }
 
@@ -333,7 +351,7 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 		dispatch_async(_autosaveQueue, ^{
 			[self unsetAutosaveToken];
 		});
-
+		
 		return;
 	}
 	
@@ -343,31 +361,35 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 	// Update change date
 	[self updateChangeDate];
 	
-	// Change autosave token in a autosave queue to synchronize it. Block retains 'self' since the autosave token has not been set yet.
-	dispatch_async(_autosaveQueue, ^{
-		// Autosave is already scheduled or pending: do nothing.
-		if (_autosaveToken)
-			return;
-
-		// Activate autosave token to ensure document is kept alive and saved on exit
-		[self setAutosaveToken];
-		
-		// Run autosave after predefined delay.
-		__weak ULDocument *weakSelf = self;
-		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, ULDocumentAutosaveDelay * NSEC_PER_SEC), _autosaveQueue, ^(void) {
-			ULDocument *strongSelf = weakSelf;
-			if (!strongSelf || !strongSelf->_autosaveToken)
+	// Change autosave token in a autosave queue to synchronize it. Block retains 'self' since the autosave token has not been set yet. Do not trigger autosave if no URL has been set.
+	if (self.fileURL) {
+		dispatch_async(_autosaveQueue, ^{
+			// Autosave is already scheduled or pending: do nothing.
+			if (_autosaveToken)
 				return;
+			
+			// Activate autosave token to ensure document is kept alive and saved on exit
+			[self setAutosaveToken];
+			
+			// Use a different delay if the document is stored on an ubiquitous store, so back-off strategies of iCloud services are not triggered.
+			NSTimeInterval autosaveDelay = self.fileURL.ul_isUbiquitousItem ? ULDocumentUbiquitousAutosaveDelay : ULDocumentAutosaveDelay;
+			
+			// Run autosave after predefined delay.
+			__weak ULDocument *weakSelf = self;
+			dispatch_after(dispatch_time(DISPATCH_TIME_NOW, autosaveDelay * NSEC_PER_SEC), _autosaveQueue, ^(void) {
+				ULDocument *strongSelf = weakSelf;
+				if (!strongSelf || !strongSelf->_autosaveToken)
+					return;
 				
-			// Deregister autosave token and termination observers
-			[strongSelf unsetAutosaveToken];
-
-			// Autosave only if still needed
-			if ([strongSelf hasUnsavedChanges])
+				// Deregister autosave token and termination observers
+				[strongSelf unsetAutosaveToken];
+				
+				// Autosave only if still needed
 				[strongSelf autosaveWithCompletionHandler: nil];
+			});
 		});
-	});
-	
+	}
+
 	
 	// Update counter only if still possible
 	if (self.changeCount == NSIntegerMax)
@@ -409,36 +431,61 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 
 + (id)changeTokenForItemAtURL:(NSURL *)documentURL
 {
-	NSError *error;
+	// Get attributes that should be used for calculating the change token
 	NSArray *urlAttributes;
 	NSString *versionIdentifier;
 	
 	[self getChangeTokenURLAttributes:&urlAttributes versionIdentifier:&versionIdentifier];
+	
+	// Create unique token value for document file
+	NSMutableString *changeToken = [versionIdentifier mutableCopy];
+	[self readChangeInformationForItemAtURL:documentURL usingAttributes:urlAttributes andAppendToToken:changeToken];
+	
+	// If needed create token for package descendants
+	if (self.shouldHandleSubitemChanges) {
+		NSMutableArray *subitemURLs = [NSMutableArray new];
+		
+		for (NSURL *subitemURL in [NSFileManager.defaultManager enumeratorAtURL:documentURL includingPropertiesForKeys:nil options:0 errorHandler:nil]) {
+			[subitemURLs addObject: subitemURL];
+		}
+		
+		[subitemURLs sortUsingComparator:^NSComparisonResult(NSURL *url1, NSURL *url2) {
+			return [url1.path compare: url2.path];
+		}];
+		
+		for (NSURL *subitemURL in subitemURLs) {
+			[self readChangeInformationForItemAtURL:subitemURL usingAttributes:urlAttributes andAppendToToken:changeToken];
+		}
+	}
 
-	NSDictionary *resourceValues = [documentURL ul_uncachedResourceValuesForKeys:urlAttributes error:&error];
+	return changeToken;
+}
+
++ (void)readChangeInformationForItemAtURL:(NSURL *)itemURL usingAttributes:(NSArray *)urlAttributes andAppendToToken:(NSMutableString *)changeToken
+{
+	NSError *error;
+	NSDictionary *resourceValues = [itemURL ul_uncachedResourceValuesForKeys:urlAttributes error:&error];
 	
 	// Report any errors. Prevent search index corruption by creating random tokens on error
 	if (!resourceValues) {
-		ULError(@"Cannot request change token attributes from '%@' for '%@': %@", urlAttributes, documentURL, error);
-		return [NSString stringWithFormat: @"e:%X", arc4random()];
+		ULError(@"Cannot request change token attributes from '%@' for '%@': %@", urlAttributes, itemURL, error);
+		[changeToken appendString: [NSString stringWithFormat: @"e:%X", arc4random()]];
+		return;
 	}
-
-	// Create unique token value.
-	NSMutableString *changeToken = [versionIdentifier mutableCopy];
-
+	
 	for (NSString *urlAttribute in urlAttributes) {
 		id tokenValue = resourceValues[urlAttribute];
 		[changeToken appendString: @"|"];
 		
 		if ([tokenValue isKindOfClass: NSDate.class])
 			[changeToken appendFormat: @"%lX", (unsigned long)[tokenValue timeIntervalSinceReferenceDate]];
-
+		
+		else if ([tokenValue isKindOfClass: NSData.class])
+			[changeToken appendString: [tokenValue base64EncodedStringWithOptions: 0]];
+		
 		else if (tokenValue)
 			[changeToken appendString: [tokenValue description]];
 	}
-	
-	// Create token based on resource values. Calling -hash directly would not provide a proper value for NSDictionary.
-	return changeToken;
 }
 
 + (void)getChangeTokenURLAttributes:(NSArray **)outAttributes versionIdentifier:(NSString **)outIdentifier
@@ -448,12 +495,18 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 	
 	static dispatch_once_t onceToken;
 	dispatch_once(&onceToken, ^{
-		attributes = @[(id)kCFURLContentModificationDateKey];
+		// Use generation identifier and date, in case generation identifiers are not working properly / are not available
+		attributes = @[(id)kCFURLContentModificationDateKey, (id)kCFURLGenerationIdentifierKey];
 		versionIdentifier = @"1";
 	});
 	
 	if (outAttributes) *outAttributes = attributes;
 	if (outIdentifier) *outIdentifier = versionIdentifier;
+}
+
++ (BOOL)usesConsistentPersistenceFormat
+{
+	return YES;
 }
 
 - (void)setAutosaveToken
@@ -464,14 +517,21 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 	// Create a cyclic reference to ensure that the document is kept alive until autosave happens
 	_autosaveToken = self;
 	
-	// Register for notifications to autosave on termination / resign active
-	#if TARGET_OS_IPHONE
-		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(applicationWillResignActive:) name:UIApplicationWillResignActiveNotification object:nil];
-		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(applicationWillTerminate:) name:UIApplicationWillTerminateNotification object:nil];
-	#else
-		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(applicationWillResignActive:) name:NSApplicationWillResignActiveNotification object:nil];
-		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
-	#endif
+	// Register for notifications to autosave on termination / resign active. Notification blocks are used to ensure observers are properly retained.
+#if TARGET_OS_IPHONE
+	NSString *resignNotification = UIApplicationWillResignActiveNotification;
+	NSString *terminationNotification = UIApplicationWillTerminateNotification;
+#else
+	NSString *resignNotification = NSApplicationWillResignActiveNotification;
+	NSString *terminationNotification = NSApplicationWillTerminateNotification;
+#endif
+	
+	_resignActiveObserverToken = [NSNotificationCenter.defaultCenter addObserverForName:resignNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
+		[self applicationWillResignActive: note];
+	}];
+	_terminationObserverToken = [NSNotificationCenter.defaultCenter addObserverForName:terminationNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
+		[self applicationWillTerminate: note];
+	}];
 }
 
 - (void)unsetAutosaveToken
@@ -479,16 +539,16 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 	if (!_autosaveToken)
 		return;
 
+	// Disable autosave observers and allow document to be released
+	[NSNotificationCenter.defaultCenter removeObserver: _resignActiveObserverToken];
+	[NSNotificationCenter.defaultCenter removeObserver: _terminationObserverToken];
+
+	// Tokens must be unset, since they retain references to the observer block.
+	_resignActiveObserverToken = nil;
+	_terminationObserverToken = nil;
+	
 	// Autosave happened: no further retaining needed
 	_autosaveToken = nil;
-		
-	#if TARGET_OS_IPHONE
-		[NSNotificationCenter.defaultCenter removeObserver:self name:UIApplicationWillResignActiveNotification object:nil];
-		[NSNotificationCenter.defaultCenter removeObserver:self name:UIApplicationWillTerminateNotification object:nil];
-	#else
-		[NSNotificationCenter.defaultCenter removeObserver:self name:NSApplicationWillResignActiveNotification object:nil];
-		[NSNotificationCenter.defaultCenter removeObserver:self name:NSApplicationWillTerminateNotification object:nil];
-	#endif
 }
 
 
@@ -534,14 +594,18 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 		}];
 		
 		ULNoticeEndURL(self.fileURL);
-
+		
+		// Handle coordination error
+		if (error)
+			ULError(@"Error coordinating reading file access on '%@': %@", self.fileURL.path, error);
+		
 		// Set last read error
 		self.lastReadError = error ?: readError;
 		
 		// Callback
 		if (!success)
 			ULError(@"Error opening file %@: %@", self.fileURL.path, error ?: readError);
-			
+		
 		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 			if (completionHandler)
 				completionHandler(success);
@@ -559,6 +623,13 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 
 - (void)autosaveWithCompletionHandler:(void (^)(BOOL success))completionHandler
 {
+	if (!self.hasUnsavedChanges) {
+		if (completionHandler)
+			completionHandler(YES);
+		
+		return;
+	}
+	
 	NSURL *url = [self URLForSaveOperation:ULDocumentAutosave ignoreCurrentName:NO];
 	if (!url) return;
 	
@@ -579,24 +650,14 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 		}
 		
 		// Write changes if needed
-		if (self.hasUnsavedChanges) {
-			[self autosaveWithCompletionHandler: ^(BOOL success) {
-				[self close];
-				if (completionHandler) {
-					dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-						completionHandler(success);
-					});
-				}
-			}];
-		}
-		else {
+		[self autosaveWithCompletionHandler: ^(BOOL success) {
 			[self close];
 			if (completionHandler) {
 				dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-					completionHandler(YES);
+					completionHandler(success);
 				});
 			}
-		}
+		}];
 	}];
 }
 
@@ -633,7 +694,7 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 			self.fileChangeToken = nil;
 		}
 		else
-			ULError(@"Error deleting file: %@", (error ?: deleteError).localizedDescription);
+			ULError(@"Error deleting file: %@", (error ?: deleteError));
 		
 		// Callback
 		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -660,7 +721,7 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 - (void)revertToContentsOfURL:(NSURL *)url completionHandler:(void (^)(BOOL success))completionHandler
 {
 	// No duplicate reverts to the same URL
-	if ([self.revertURL ul_isEqualToFileURL:url])
+	if ([self.revertURL ul_isEqualToFileURL: url])
 		return;
 	else
 		NSAssert(!self.revertURL, @"Document is currently being reverted to URL %@, but second request to revert to %@ was issued!", self.revertURL, url);
@@ -685,11 +746,19 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 		
 		ULNoticeEndURL(self.fileURL);
 		
+		// Handle coordination error
+		if (error)
+			ULError(@"Error coordinating reading file access on '%@': %@", self.fileURL.path, error);
+		
+		// Update error status
+		self.lastReadError = error ?: readError;
+		
 		// Callback
 		if (!success)
-			ULError(@"Error reverting to file %@: %@", self.fileURL.path, (error ?: readError).localizedDescription);
+			ULError(@"Error reverting to file %@: %@", self.fileURL.path, (error ?: readError));
 		else
 			[self enableEditing];
+		
 		self.revertURL = nil;
 		self.changeDate = self.fileModificationDate;
 		
@@ -700,12 +769,61 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 	}];
 }
 
+- (void)replaceWithFileVersion:(NSFileVersion *)version completionHandler:(void (^)(BOOL))completionHandler
+{
+	[self disableEditing];
+	
+	[_interactionQueue addOperationWithBlock:^{
+		// Replace old contents
+		NSError *error;
+		__block NSError *operationError;
+		
+		[[[NSFileCoordinator alloc] initWithFilePresenter: _presenter] coordinateReadingItemAtURL:version.URL options:NSFileCoordinatorReadingWithoutChanges writingItemAtURL:self.fileURL options:NSFileCoordinatorWritingForReplacing error:&error byAccessor:^(NSURL *srcURL, NSURL *destURL) {
+			NSError *localError;
+			
+			// Replace file
+			NSURL *newURL = [version replaceItemAtURL:destURL options:NSFileVersionReplacingByMoving error:&localError];
+			if (!newURL) {
+				operationError = localError;
+				return;
+			}
+			
+			// Revert contents
+			BOOL success = [self coordinatedOpenFromURL:destURL error:&localError];
+			if (!success)
+				operationError = localError;
+		}];
+		
+		// Handle coordination error
+		if (error)
+			ULError(@"Error coordinating reading file access on '%@': %@", self.fileURL.path, error);
+		else
+			error = operationError;
+		
+		// Handle operation errors
+		if (!operationError)
+			self.changeDate = self.fileModificationDate;
+		else
+			ULError(@"Cannot replace version '%@' with '%@': %@", self.fileURL.path, version.URL.path, error);
+			
+		[self enableEditing];
+		
+		if (completionHandler)
+			completionHandler(!error);
+	}];
+}
+
 
 #pragma mark -
 
 - (NSURL *)URLForSaveOperation:(ULDocumentSaveOperation)saveOperation ignoreCurrentName:(BOOL)ignoreCurrentName
-{ 
+{
 	return [[self.fileURL URLByDeletingLastPathComponent] URLByAppendingPathComponent: self.preferredFilename];
+}
+
+- (void)didUpdatePersistentRepresentation
+{
+	// Empty implementation
 }
 
 - (void)didChangeFileURLBySaving
@@ -734,16 +852,15 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 	self.changeToken = self.fileChangeToken;
 	self.currentVersion = [NSFileVersion currentVersionOfItemAtURL: self.fileURL];
 	
-	// Note to update conflict versions.
-	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
-		[self updateConflictVersions];
-	});
-	
 	// Update state
 	self.documentIsOpen = YES;
 	self.lastFileOpenDate = [NSDate new];
 	
 	if (!_isReadOnly) {
+		// Deactivate existing presenters (e.g. when called by revert)
+		[_presenter endPresentation];
+		
+		// Activate new presenter
 		_presenter = [[ULFilePresentationProxy alloc] initWithOwner: self];
 		[_presenter beginPresentationOnURL: url];
 	}
@@ -756,25 +873,30 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 - (void)saveToURL:(NSURL *)url forSaveOperation:(ULDocumentSaveOperation)saveOperation completionHandler:(void (^)(BOOL success))completionHandler
 {
 	NSParameterAssert(url);
-
-	[_interactionQueue addOperationWithBlock:^{
-		__autoreleasing NSError *error;
-		
-		// Perform write
-		BOOL success = [self saveToURL:url forSaveOperation:saveOperation error:&error];
-		if (!success) {
-			ULError(@"Error writing file: %@ Path: %@", error.localizedDescription, url.path);
-		
-			// Post error notification if needed
-			if (!completionHandler)
-				[self notifyError:error forSaveOperation:saveOperation];
-		}
-		
-		// Notify
-		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-			if (completionHandler)
-				completionHandler(success);
-		});
+	
+	[ULDeadlockDetector performOperationWithContext:@(saveOperation) maximumDuration:ULDocumentMaximumSaveDuration delegate:self usingBlock:^(void (^terminationHandler)(void)) {
+		[_interactionQueue addOperationWithBlock:^{
+			__autoreleasing NSError *error;
+			
+			// Perform write
+			BOOL success = [self saveToURL:url forSaveOperation:saveOperation error:&error];
+			if (!success) {
+				ULError(@"Error writing file: %@ Path: %@", error, url.path);
+				
+				// Post error notification if needed
+				if (!completionHandler)
+					[self notifyError:error forSaveOperation:saveOperation];
+			}
+			
+			// Finish deadlock detection
+			terminationHandler();
+			
+			// Notify
+			dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+				if (completionHandler)
+					completionHandler(success);
+			});
+		}];
 	}];
 }
 
@@ -787,45 +909,49 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 	// Only standardize URL, do not resolve exact filename since filename's case may change
 	url = url.ul_URLByFastStandardizingPath;
 	
-	// Renaming and writing a file (use direct, standardized URL comparison to detect filename case changes, instead of -ul_isEqualToFileURL:)
+	// Renaming and writing a file (use direct, standardized URL comparison to detect filename case changes, instead of -isEqualToFileURL:)
 	if ((saveOperation == ULDocumentSave || saveOperation == ULDocumentAutosave) && ![url isEqual: self.fileURL] && [self.fileURL checkResourceIsReachableAndReturnError: NULL]) {
 		NSFileCoordinator *coordinator = [[NSFileCoordinator alloc] initWithFilePresenter: _presenter];
 		__block NSURL *movedURL;
 		__block NSError *operationError;
 		
 		ULNoticeBeginURL(self.fileURL);
-
+		
 		[coordinator ul_coordinateMovingItemAtURL:self.fileURL toURL:url error:&localError byAccessor:^(NSURL *currentURL, NSURL *newURL) {
 			// File has been deleted externally
 			if (_deletionPending) {
 				operationError = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey: @"Deletion pending."}];
 				return;
 			}
-
+			
 			// Move old file, if URL is about to change
 			if (![NSFileManager.defaultManager ul_moveItemCaseSensistiveAtURL:currentURL toURL:newURL error:&operationError]) {
 				success = NO;
 				return;
 			}
-
+			
 			[coordinator itemAtURL:currentURL didMoveToURL:newURL];
-
+			
 			// Resolve to exact URL
 			movedURL = newURL.ul_URLByResolvingExactFilenames;
-
+			
 			self.fileURL = movedURL;
-
+			
 			// File has been deleted externally
 			if (_deletionPending) {
 				operationError = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey: @"Deletion pending."}];
 				success = NO;
 				return;
 			}
-
+			
 			// Write wrapper
 			success = [self coordinatedSaveToURL:movedURL forSaveOperation:saveOperation error:&operationError];
 			[self didChangeFileURLBySaving];
 		}];
+		
+		// Handle coordination error
+		if (localError)
+			ULError(@"Error coordinating file access on '%@': %@", self.fileURL.path, localError);
 		
 		localError = localError ?: operationError;
 		ULNoticeEndURL(self.fileURL);
@@ -844,19 +970,23 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 			
 			success = [self coordinatedSaveToURL:newURL forSaveOperation:saveOperation error:&operationError];
 		}];
+
+		// Handle coordination error
+		if (localError)
+			ULError(@"Error coordinating file access on '%@': %@", self.fileURL.path, localError);
 		
 		localError = localError ?: operationError;
 		ULNoticeEndURL(url);
 	}
-		
+	
 	// Report
 	if (outError) *outError = localError;
 	self.lastWriteError = localError;
-
-	// Notify unhandled errors	
+	
+	// Notify unhandled errors
 	if (!success && !outError)
 		[self notifyError:localError forSaveOperation:saveOperation];
-		
+	
 	return success;
 }
 
@@ -888,15 +1018,19 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 	
 	[self breakUndoCoalescing];
 	
-	// We need to create a unique timestamp for each new version of the file (e.g. for indexing). Since file modification dates have a second as granularity, we may need to wait...
-	if (self.fileModificationDate.timeIntervalSinceReferenceDate >= floor(NSDate.timeIntervalSinceReferenceDate))
+	[self didUpdatePersistentRepresentation];
+	
+	// We need to create a unique timestamp for each new version of the file (e.g. for indexing), if generation identifiers are not supported. Since file modification dates have a second as granularity, we may need to wait...
+	if (!self.fileURL.ul_generationIdentifier && self.fileModificationDate.timeIntervalSinceReferenceDate >= floor(NSDate.timeIntervalSinceReferenceDate)) {
 		[NSThread sleepUntilDate: [NSDate dateWithTimeIntervalSinceReferenceDate: ceil(NSDate.timeIntervalSinceReferenceDate)]];
 	
-	// Make sure that file modification date is updated to the new timestamp (the actual file modification happened before getting a unique time stamp...)
-	[url setResourceValue:[NSDate new] forKey:NSURLContentModificationDateKey error:NULL];
+		// Make sure that file modification date is updated to the new timestamp (the actual file modification happened before getting a unique time stamp...).
+		[url setResourceValue:[NSDate new] forKey:NSURLContentModificationDateKey error:NULL];
+	}
+		
 	self.fileModificationDate = url.ul_fileModificationDate;
 	
-	// Update change token to persisted state. This ensures that stale -presentedItemDidChange notifications will not revert changes happen in memory while saving the file.
+	// Update file change token to persisted state. This ensures that stale -presentedItemDidChange notifications will not revert changes happen in memory while saving the file.
 	self.fileChangeToken = [self.class changeTokenForItemAtURL: url];
 	
 	// If a change occured while saving: update change count to mark document as dirty and ensure that changeToken is set to a non-persistent value.
@@ -904,8 +1038,12 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 		[self updateChangeCount: ULDocumentChangeDone | ULDocumentChangeNotUndoable];
 	
 	// If there are no unsaved changes, the change token should be based on information persisted to the file system.
-	// We completely switch to the currently persisted state, since it may contain additional file system attributes and dates with different precision.
-	else
+	//
+	// - We completely switch to the currently persisted state, since it may contain additional file system attributes and dates with different precision.
+	//
+	// - We keep the in-memory change token for all formats where persistent contents might differ from the in-memory contents (see -usesConsistentPersistenceFormat).
+	//   This way the changeToken property reflects that there might be differences between the persistent and the in-memory contents
+	else if (self.class.usesConsistentPersistenceFormat)
 		self.changeToken = self.fileChangeToken;
 	
 	// Update current version
@@ -920,17 +1058,26 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 	return YES;
 }
 
+#if !TARGET_OS_IPHONE
+
 - (BOOL)writeSafelyToURL:(NSURL *)url forSaveOperation:(ULDocumentSaveOperation)saveOperation error:(NSError **)outError
 {
 	NSParameterAssert(url);
 	
 	NSFileManager *fileManager = NSFileManager.defaultManager;
 	
-	// Create temporary folder
-	NSURL *temporaryFolderURL = [fileManager URLForDirectory:NSItemReplacementDirectory inDomain:NSUserDomainMask appropriateForURL:url create:YES error:outError];
-	if (!temporaryFolderURL)
+	// Fetch URL for appropriate temporary folder (may vary on different Volumes)
+	NSURL *systemTemporaryFolderURL = [fileManager URLForDirectory:NSItemReplacementDirectory inDomain:NSUserDomainMask appropriateForURL:url create:NO	error:outError];
+    if (!systemTemporaryFolderURL)
+        return NO;
+	
+	[NSFileManager.defaultManager removeItemAtURL:systemTemporaryFolderURL error:NULL];
+	
+	// ULYSSES-4940: We're modifying the suggested temporary folder due to random failures when accessing the replacement directory
+	NSURL *temporaryFolderURL = [systemTemporaryFolderURL.URLByDeletingLastPathComponent URLByAppendingPathComponent: NSString.ul_newUniqueIdentifier];
+	if (![NSFileManager.defaultManager createDirectoryAtURL:temporaryFolderURL withIntermediateDirectories:YES attributes:nil error:outError])
 		return NO;
-
+	
 	// Create URL for temporary file
 	NSURL *temporaryFileURL = [temporaryFolderURL URLByAppendingPathComponent: url.lastPathComponent];
 	
@@ -938,17 +1085,17 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 	// Note: We copy it, since some applications would lose track of the file when moving it away. (e.g. TextEdit)
 	if ([url checkResourceIsReachableAndReturnError: NULL]) {
 		// Fast path: Try hard linking first
-		if (![fileManager linkItemAtURL:url toURL:temporaryFileURL error:NULL]) {
-			// Linking failed: remove if anything has been generated while linking (e.g. empty folders, see ULYSSES-2533)
-			[fileManager removeItemAtURL:temporaryFileURL error:NULL];
+        if (![fileManager linkItemAtURL:url toURL:temporaryFileURL error:NULL]) {
+            // Linking failed: remove if anything has been generated while linking (e.g. empty folders, see ULYSSES-2533)
+            [fileManager removeItemAtURL:temporaryFileURL error:NULL];
 			
-			// Slow path: make a full copy.
-			if (![fileManager copyItemAtURL:url toURL:temporaryFileURL error:outError]) {
+            // Slow path: make a full copy.
+            if (![fileManager copyItemAtURL:url toURL:temporaryFileURL error:outError]) {
 				// Copying failed: remove entire temporary folder
-				[fileManager removeItemAtURL:temporaryFolderURL error:NULL];
-				return NO;
-			}
-		}
+                [fileManager removeItemAtURL:temporaryFolderURL error:NULL];
+                return NO;
+            }
+        }
 	}
 	
 	// Write new version to location
@@ -957,15 +1104,14 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 		[fileManager removeItemAtURL:temporaryFolderURL error:NULL];
 		return NO;
 	}
-	
-#if !TARGET_OS_IPHONE
+
 	// Store old state as version
 	if ([temporaryFileURL checkResourceIsReachableAndReturnError: NULL]) {
 		BOOL shouldAddVersion;
 		
 		switch (saveOperation) {
 			case ULDocumentSave:
-				shouldAddVersion = (self.changeDate && [self.changeDate.ul_dateWithFilesystemPrecision timeIntervalSinceDate: self.fileModificationDate] > 0);
+				shouldAddVersion = (self.changeDate && [self.changeDate timeIntervalSinceDate: self.fileModificationDate] > 0);
 				break;
 				
 			case ULDocumentAutosave:
@@ -982,7 +1128,6 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 		if (shouldAddVersion && ![NSFileVersion addVersionOfItemAtURL:url withContentsOfURL:temporaryFileURL options:NSFileVersionAddingByMoving error:outError])
 			ULNotice(@"Can't store version of item '%@' using temporary URL %@: %@", url, temporaryFileURL, *outError);
 	}
-#endif
 	
 	// Remove temporary directory
 	[fileManager removeItemAtURL:temporaryFolderURL error:NULL];
@@ -991,22 +1136,42 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 	return YES;
 }
 
+#else
+
+- (BOOL)writeSafelyToURL:(NSURL *)url forSaveOperation:(ULDocumentSaveOperation)saveOperation error:(NSError *__autoreleasing *)outError
+{
+	NSParameterAssert(url);
+	
+	// iOS implementation runs without versions support.
+	return [self writeToURL:url forSaveOperation:saveOperation originalContentsURL:self.fileURL error:outError];
+}
+
+#endif
+
 - (void)notifyError:(NSError *)error forSaveOperation:(ULDocumentSaveOperation)saveOperation
 {
 	NSParameterAssert(error);
 
+	ULError(@"Detected error when saving document '%@': %@", self.fileURL, error);
+	
 	// Do not notify if we already submitted the same error for the same change date. Make the error visible again after 60s.
-	if ([_lastWriteErrorDate isEqualToDate: self.changeDate] && [self.lastWriteError isEqual: error] && (_lastVisibleErrorNotificationDate.timeIntervalSinceNow > -60) && (saveOperation == ULDocumentAutosave))
+	if ([self.lastWriteErrorDate isEqualToDate: self.changeDate] && [self.lastWriteError isEqual: error] && (self.lastVisibleErrorNotificationDate.timeIntervalSinceNow > -60) && (saveOperation == ULDocumentAutosave))
 		return;
-		
-	_lastVisibleErrorNotificationDate = [NSDate dateWithTimeIntervalSinceNow: 0];
-	_lastWriteErrorDate = self.changeDate;
+	
+	self.lastVisibleErrorNotificationDate = [NSDate dateWithTimeIntervalSinceNow: 0];
+	self.lastWriteErrorDate = self.changeDate;
 	self.lastWriteError = error;
 	
 	// Handle error asynchronously to prevent main-queue deadlocks
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 		[NSNotificationCenter.defaultCenter postNotificationName:ULDocumentUnhandeledSaveErrorNotification object:self userInfo:@{ULDocumentUnhandeledSaveErrorNotificationErrorKey: error}];
 	});
+}
+
+- (void)deadlockDetectorDidExceedTimeLimit:(ULDeadlockDetector *)deadlockDetector
+{
+	NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:EBUSY userInfo:@{NSLocalizedDescriptionKey: @"Reached time out for save operation."}];
+	[self notifyError:error forSaveOperation:[deadlockDetector.context unsignedIntegerValue]];
 }
 
 
@@ -1021,7 +1186,7 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 - (NSFileWrapper *)fileWrapperWithError:(NSError **)outError
 {
 	NSAssert(NO, @"Neither -writeToURL:forSaveOperation:originalContentsURL:error: nor -fileWrapperWithError: have been overridden!");
-	return NO;
+	return nil;
 }
 
 - (BOOL)readFromURL:(NSURL *)url error:(NSError **)outError
@@ -1047,6 +1212,11 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 	return self.fileURL;
 }
 
++ (BOOL)shouldHandleSubitemChanges
+{
+	return NO;
+}
+
 
 #pragma mark - File presentation
 
@@ -1065,32 +1235,31 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 - (void)relinquishPresentedItemToReader:(void (^)(void (^)(void)))reader
 {
 	[self disableEditing];
+
+	__weak typeof(self) weakSelf = self;
 	reader(^{
-		[self enableEditing];
+		typeof(self) strongSelf = weakSelf;
+		[strongSelf enableEditing];
 	});
 }
 
 - (void)relinquishPresentedItemToWriter:(void (^)(void (^reaquirer)(void)))writer
 {
 	[self disableEditing];
+
+	__weak typeof(self) weakSelf = self;
 	writer(^{
-		[self enableEditing];
+		typeof(self) strongSelf = weakSelf;
+		[strongSelf enableEditing];
 	});
 }
 
 - (void)savePresentedItemChangesWithCompletionHandler:(void (^)(NSError *errorOrNil))completionHandler
 {
 	// Perform autosave if state is dirty
-	if ([self hasUnsavedChanges]) {
-		[self autosaveWithCompletionHandler: ^(BOOL success){
-			completionHandler(success ? nil : [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:nil]);
-		}];
-	}
-	// Nothing to save
-	else {
-		if (completionHandler)
-			completionHandler(nil);
-	}
+	[self autosaveWithCompletionHandler: ^(BOOL success) {
+		completionHandler(success ? nil : [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:nil]);
+	}];
 }
 
 - (void)accommodatePresentedItemDeletionWithCompletionHandler:(void (^)(NSError *errorOrNil))completionHandler
@@ -1115,7 +1284,7 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 	// Notify on document change if change token has been changed
 	if (![self.changeToken isEqual: [self.class changeTokenForItemAtURL: newURL]])
 		[self presentedItemDidChange];
-		
+	
 	[self didMoveToURL: newURL];
 }
 
@@ -1131,7 +1300,8 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 		
 		ULNoticeBeginURL(strongSelf.fileURL);
 		
-		[[[NSFileCoordinator alloc] initWithFilePresenter: strongSelf->_presenter] coordinateReadingItemAtURL:strongSelf.fileURL options:NSFileCoordinatorReadingWithoutChanges error:NULL byAccessor:^(NSURL *newURL) {
+		NSError *error;
+		[[[NSFileCoordinator alloc] initWithFilePresenter: strongSelf->_presenter] coordinateReadingItemAtURL:strongSelf.fileURL options:NSFileCoordinatorReadingWithoutChanges error:&error byAccessor:^(NSURL *newURL) {
 			newURL = newURL.ul_URLByResolvingExactFilenames;
 			
 			// Item seems to be still reachable
@@ -1140,54 +1310,35 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 				//  - current state in memory is not based upon latest state on disk (tested through fileChangeToken)
 				//	- must not be the *same* date, but may be *older* if an older file is reverted!
 				//	- recognize URL changes that have not been notified as move, since file presentation doesn't notify filename case changes properly...
-				if (strongSelf.documentIsOpen && !([strongSelf.fileChangeToken isEqual: [self.class changeTokenForItemAtURL: newURL]] && [self.fileURL.ul_URLByFastStandardizingPath isEqual:newURL]))
+				if (strongSelf.documentIsOpen && !([strongSelf.fileChangeToken isEqual: [self.class changeTokenForItemAtURL: newURL]] && [self.fileURL.ul_URLByFastStandardizingPath isEqual: newURL]))
 					[strongSelf revertToContentsOfURL:newURL completionHandler: nil];
 			}
 			
 			// Item is gone, close
 			else {
-				[strongSelf accommodatePresentedItemDeletionWithCompletionHandler: nil];
+				[strongSelf accommodatePresentedItemDeletionWithCompletionHandler:^(NSError *errorOrNil) {}];
 			}
 		}];
 		
 		ULNoticeEndURL(strongSelf.fileURL);
+		
+		// Handle coordination errors
+		if (error)
+			ULError(@"Error coordinating reading file access on '%@': %@", self.fileURL.path, error);
 	}];
 }
 
-
-#pragma mark - Conflict managment
-
-- (void)presentedItemDidGainVersion:(NSFileVersion *)version
+- (void)presentedSubitemDidChangeAtURL:(NSURL *)url
 {
-	if (version.isConflict)
-		self.conflictVersions = (self.conflictVersions ? [self.conflictVersions arrayByAddingObject: version] : @[version]);
-	else
-		self.currentVersion = version;
+	if (self.class.shouldHandleSubitemChanges)
+		[self presentedItemDidChange];
 }
 
-- (void)presentedItemDidLoseVersion:(NSFileVersion *)version
+#if TARGET_OS_IPHONE
+- (void)filePresentationProxyDidRestartPresentation:(ULFilePresentationProxy *)proxy
 {
-	if (version.isConflict) {
-		NSMutableArray *versions = [NSMutableArray arrayWithArray: self.conflictVersions];
-		[versions removeObject: version];
-		self.conflictVersions = (versions.count >= 1 ? [versions copy] : nil);
-	}
+	[self presentedItemDidChange];
 }
-
-- (void)presentedItemDidResolveConflictVersion:(NSFileVersion *)version
-{
-	NSMutableArray *versions = [NSMutableArray arrayWithArray: self.conflictVersions];
-	[versions removeObject: version];
-	self.conflictVersions = (versions.count >= 1 ? [versions copy] : nil);
-}
-
-- (void)updateConflictVersions
-{
-	NSArray *conflicts = (self.fileURL ? [NSFileVersion unresolvedConflictVersionsOfItemAtURL: self.fileURL] : nil);
-	conflicts = (conflicts.count >= 1 ? conflicts : nil);
-	
-	if (self.conflictVersions != conflicts && ![self.conflictVersions isEqualToArray: conflicts])
-		self.conflictVersions = conflicts;
-}
+#endif
 
 @end

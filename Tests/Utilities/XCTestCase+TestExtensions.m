@@ -1,7 +1,7 @@
 //
 //  XCTestCase+TestExtensions.m
 //
-//  Copyright (c) 2014 The Soulmen GbR
+//  Copyright © 2018 Ulysses GmbH & Co. KG
 //
 //	Permission is hereby granted, free of charge, to any person obtaining a copy
 //	of this software and associated documentation files (the "Software"), to deal
@@ -24,17 +24,17 @@
 
 #import "XCTestCase+TestExtensions.h"
 
+#import "NSString+UniqueIdentifier.h"
 #import <objc/runtime.h>
-
 
 #pragma mark - Test environment
 
-@implementation XCTestCase (TestEnvironment)
+@implementation XCTestCase (ULTestEnvironment)
 
 - (void)setUp
 {
 	// Ensure that our temporary directory for testing is empty
-	NSURL *temporaryDirectoryURL = self.temporaryDirectoryURL;
+	NSURL *temporaryDirectoryURL = self.ul_temporaryDirectoryURL;
 	
 	if ([temporaryDirectoryURL checkResourceIsReachableAndReturnError: NULL]) {
 		NSError *error;
@@ -46,72 +46,44 @@
 }
 
 
-#pragma mark - Test bundles
-
-- (NSURL *)URLForFile:(NSString *)path
-{
-	return [NSBundle.mainBundle URLForResource:[[path lastPathComponent] stringByDeletingPathExtension] withExtension:[path pathExtension] subdirectory:[@"Test Data" stringByAppendingPathComponent: [path stringByDeletingLastPathComponent]]];
-}
-
-- (NSFileWrapper *)fileWrapperForFile:(NSString *)path
-{
-	return [[NSFileWrapper alloc] initWithURL:[self URLForFile: path] options:0 error:NULL];
-}
-
-
 #pragma mark - Temporary folders
 
-- (NSString *)temporaryDirectoryName
+- (NSString *)ul_temporaryDirectoryName
 {
 	return [NSTemporaryDirectory() stringByAppendingPathComponent: [NSString stringWithFormat: @"%@%@", NSStringFromClass(self.class), NSStringFromSelector(self.invocation.selector)]];
 }
 
-- (NSString *)temporaryDirectory
+- (NSString *)ul_temporaryDirectory
 {
-	[[NSFileManager defaultManager] createDirectoryAtPath:self.temporaryDirectoryName withIntermediateDirectories:YES attributes:nil error:NULL];
-	return self.temporaryDirectoryName;
+	[[NSFileManager defaultManager] createDirectoryAtPath:self.ul_temporaryDirectoryName withIntermediateDirectories:YES attributes:nil error:NULL];
+	return self.ul_temporaryDirectoryName;
 }
 
-- (NSURL *)temporaryDirectoryURL
+- (NSURL *)ul_temporaryDirectoryURL
 {
-	return [NSURL fileURLWithPath: self.temporaryDirectory];
+	return [NSURL fileURLWithPath: self.ul_temporaryDirectory];
 }
 
-- (NSURL *)newTemporarySubdirectory
+- (NSURL *)ul_newTemporarySubdirectory
 {
-	NSURL *subDirectory = [self.temporaryDirectoryURL URLByAppendingPathComponent: [self.class newUniqueIdentifier]];
+	NSURL *subDirectory = [self.ul_temporaryDirectoryURL URLByAppendingPathComponent: [NSString ul_newUniqueIdentifier]];
 	[[NSFileManager defaultManager] createDirectoryAtURL:subDirectory withIntermediateDirectories:YES attributes:nil error:NULL];
 	
 	// Ensure trailing slashes
 	return [NSURL fileURLWithPath: subDirectory.path];
 }
 
-+ (NSString *)newUniqueIdentifier
-{
-	// Pure UUID
-	CFUUIDRef uuid = CFUUIDCreate(NULL);
-	NSString *uuidString = (__bridge_transfer NSString *)CFUUIDCreateString(NULL, uuid);
-	CFRelease(uuid);
-	
-	// Remove dashes and make lowercase
-	uuidString = [uuidString stringByReplacingOccurrencesOfString:@"-" withString:@""];
-	uuidString = uuidString.lowercaseString;
-	
-	return uuidString;
-}
-
-
 #pragma mark - Temporary filesystems
 
 #if !TARGET_OS_IPHONE
-NSString *TestCaseMSDOSFileSystemType = @"MS-DOS";
-NSString *TestCaseHFSCaseInsensitiveFileSystemType = @"HFS+";
-NSString *TestCaseHFSCaseSensitiveFileSystemType = @"Case-sensitive HFS+";
+NSString *ULTestCaseMSDOSFileSystemType = @"MS-DOS";
+NSString *ULTestCaseHFSCaseInsensitiveFileSystemType = @"HFS+";
+NSString *ULTestCaseHFSCaseSensitiveFileSystemType = @"Case-sensitive HFS+";
 
-- (NSURL *)newDummyFileSystemWithType:(NSString *)fsType size:(NSUInteger)megaBytes
+- (NSURL *)ul_newDummyFileSystemWithType:(NSString *)fsType size:(NSUInteger)megaBytes
 {
-	NSString *volumeId = [[self.class newUniqueIdentifier] substringToIndex: 8];
-	NSURL *diskImageURL = [[self newTemporarySubdirectory] URLByAppendingPathComponent: [volumeId stringByAppendingPathExtension: @"dmg"]];
+	NSString *volumeId = [[NSString ul_newUniqueIdentifier] substringToIndex: 8];
+	NSURL *diskImageURL = [[self ul_newTemporarySubdirectory] URLByAppendingPathComponent: [volumeId stringByAppendingPathExtension: @"dmg"]];
 	NSURL *volumeURL = [NSURL fileURLWithPath: [@"/Volumes/" stringByAppendingString: volumeId]];
 	
 	// Create and mount non-HFS disk image
@@ -124,14 +96,14 @@ NSString *TestCaseHFSCaseSensitiveFileSystemType = @"Case-sensitive HFS+";
 	return volumeURL;
 }
 
-- (void)unmountDummyFilesystemAtURL:(NSURL *)volumeURL
+- (void)ul_unmountDummyFilesystemAtURL:(NSURL *)volumeURL
 {
 	// Unmount temporary file system
 	NSTask *unmountTask = [NSTask launchedTaskWithLaunchPath:@"/usr/bin/hdiutil" arguments:@[@"unmount", volumeURL.path]];
 	[unmountTask waitUntilExit];
 }
 
-- (BOOL)isCaseSensitiveTestVolume
+- (BOOL)ul_isCaseSensitiveTestVolume
 {
 	NSNumber *isCaseSensitiveFS;
 	NSURL *baseURL = [NSURL fileURLWithPath: NSTemporaryDirectory()];
@@ -143,7 +115,7 @@ NSString *TestCaseHFSCaseSensitiveFileSystemType = @"Case-sensitive HFS+";
 
 #pragma mark - Script runner
 
-- (void)runScript:(NSString *)script
+- (void)ul_runScript:(NSString *)script
 {
 	NSTask *task = [NSTask launchedTaskWithLaunchPath:@"/bin/bash" arguments:@[@"-c", script]];
 	[task waitUntilExit];
@@ -155,24 +127,24 @@ NSString *TestCaseHFSCaseSensitiveFileSystemType = @"Case-sensitive HFS+";
 
 #pragma mark - Asynchronous testing
 
-@implementation XCTestCase (AsynchronousTesting)
+@implementation XCTestCase (ULAsynchronousTesting)
 
 #pragma mark - Block waiting
 
-- (BOOL)performOperation:(void (^)(void (^completionHandler)(BOOL)))block
+- (BOOL)ul_performOperation:(void (^)(void (^completionHandler)(BOOL)))block
 {
 	NSParameterAssert(block);
-	return [self performOperations: @[block]];
+	return [self ul_performOperations: @[block]];
 }
 
-- (BOOL)performOperation:(void (^)(void (^completionHandler)(BOOL)))block andOperation:(void (^)(void (^completionHandler)(BOOL)))block2
+- (BOOL)ul_performOperation:(void (^)(void (^completionHandler)(BOOL)))block andOperation:(void (^)(void (^completionHandler)(BOOL)))block2
 {
 	NSParameterAssert(block);
 	NSParameterAssert(block2);
-	return [self performOperations: @[block, block2]];
+	return [self ul_performOperations: @[block, block2]];
 }
 
-- (BOOL)performOperations:(NSArray *)blocks
+- (BOOL)ul_performOperations:(NSArray *)blocks
 {
 	NSParameterAssert(blocks);
 	
@@ -188,7 +160,6 @@ NSString *TestCaseHFSCaseSensitiveFileSystemType = @"Case-sensitive HFS+";
 	
 	for (void (^block)(void (^completionHandler)(BOOL)) in blocks)
 		dispatch_async(q, ^{ block(handler); });
-	
 	// Wait until finished
 	[lock lockWhenCondition: 0];
 	[lock unlock];
@@ -196,7 +167,7 @@ NSString *TestCaseHFSCaseSensitiveFileSystemType = @"Case-sensitive HFS+";
 	return success;
 }
 
-- (id)performOperationWithObjectHandler:(void (^)(void (^completionHandler)(id)))block
+- (id)ul_performOperationWithObjectHandler:(void (^)(void (^completionHandler)(id)))block
 {
 	NSParameterAssert(block);
 	
@@ -222,10 +193,10 @@ NSString *TestCaseHFSCaseSensitiveFileSystemType = @"Case-sensitive HFS+";
 
 #pragma mark - Asynchronous Conditions
 
-NSString *TestCaseAsynchronousConditionKey	= @"TestCaseAsynchronousConditionKey";
-NSString *TestCaseAsynchronousAssertionKey	= @"TestCaseAsynchronousAssertionKey";
+NSString *ULTestCaseAsynchronousConditionKey	= @"ULTestCaseAsynchronousConditionKey";
+NSString *ULTestCaseAsynchronousAssertionKey	= @"ULTestCaseAsynchronousAssertionKey";
 
-- (BOOL)waitForCondition:(BOOL (^)(void))block onMainLoop:(BOOL)waitOnMainLoop otherQueues:(NSArray *)otherQueues timeout:(NSTimeInterval)timeout
+- (BOOL)ul_waitForCondition:(BOOL (^)(void))block onMainLoop:(BOOL)waitOnMainLoop otherQueues:(NSArray *)otherQueues timeout:(NSTimeInterval)timeout
 {
 	NSTimeInterval start = [NSDate timeIntervalSinceReferenceDate];
 	
@@ -244,7 +215,7 @@ NSString *TestCaseAsynchronousAssertionKey	= @"TestCaseAsynchronousAssertionKey"
 	return YES;
 }
 
-- (BOOL)waitOnMainLoop:(int)waitOnMainLoop otherQueues:(NSArray *)otherQueues withTimeout:(NSTimeInterval)timeout andAssertionDescriptors:(NSArray *)descriptors
+- (BOOL)ul_waitForConditionOnMainLoop:(BOOL)waitOnMainLoop otherQueues:(NSArray *)otherQueues withTimeout:(NSTimeInterval)timeout andAssertionDescriptors:(NSArray *)descriptors
 {
 	NSTimeInterval start = [NSDate timeIntervalSinceReferenceDate];
 	BOOL failed = YES;
@@ -253,7 +224,7 @@ NSString *TestCaseAsynchronousAssertionKey	= @"TestCaseAsynchronousAssertionKey"
 		failed = NO;
 		
 		for (NSDictionary *descriptor in descriptors) {
-			BOOL (^condition)() = descriptor[TestCaseAsynchronousConditionKey];
+			BOOL (^condition)() = descriptor[ULTestCaseAsynchronousConditionKey];
 			if (!condition()) {
 				failed = YES;
 				break;
@@ -275,9 +246,9 @@ NSString *TestCaseAsynchronousAssertionKey	= @"TestCaseAsynchronousAssertionKey"
 		NSLog(@"Assertions not satisfied within %fs.", timeout);
 		
 		for (NSDictionary *descriptor in descriptors) {
-			BOOL (^condition)() = descriptor[TestCaseAsynchronousConditionKey];
+			BOOL (^condition)() = descriptor[ULTestCaseAsynchronousConditionKey];
 			if (!condition()) {
-				void (^assertion)() = descriptor[TestCaseAsynchronousAssertionKey];
+				void (^assertion)() = descriptor[ULTestCaseAsynchronousAssertionKey];
 				assertion();
 				break;
 			}

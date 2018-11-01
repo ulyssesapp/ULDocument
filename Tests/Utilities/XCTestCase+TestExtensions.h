@@ -1,7 +1,7 @@
 //
 //  XCTestCase+TemporaryState.h
 //
-//  Copyright (c) 2014 The Soulmen GbR
+//  Copyright © 2018 Ulysses GmbH & Co. KG
 //
 //	Permission is hereby granted, free of charge, to any person obtaining a copy
 //	of this software and associated documentation files (the "Software"), to deal
@@ -26,48 +26,38 @@
 
 #pragma mark - Test environment
 
-@interface XCTestCase (TestEnvironment)
-
-/*!
- @abstract Returns the URL of a file inside the test bundle.
- */
-- (NSURL *)URLForFile:(NSString *)path;
-
-/*!
- @abstract Returns a file wrapper of a file inside the test bundle.
- */
-- (NSFileWrapper *)fileWrapperForFile:(NSString *)path;
+@interface XCTestCase (ULTestEnvironment)
 
 /*!
  @abstract Creates a new, unique temporary subdirectory for the current test case. The directory will be destroyed when starting the test case the next time.
  */
-- (NSURL *)newTemporarySubdirectory;
+- (NSURL *)ul_newTemporarySubdirectory;
 
 #if !TARGET_OS_IPHONE
 /*!
  @abstract Creates a temporary file system image for running a test case.
  @discussion Available file system types are TestCaseMSDOSFileSystemType, TestCaseHFSCaseInsensitiveFileSystemType, TestCaseHFSCaseSensitiveFileSystemType.
  */
-- (NSURL *)newDummyFileSystemWithType:(NSString *)fsType size:(NSUInteger)megaBytes;
+- (NSURL *)ul_newDummyFileSystemWithType:(NSString *)fsType size:(NSUInteger)megaBytes;
 
-extern NSString *TestCaseMSDOSFileSystemType;
-extern NSString *TestCaseHFSCaseInsensitiveFileSystemType;
-extern NSString *TestCaseHFSCaseSensitiveFileSystemType;
+extern NSString *ULTestCaseMSDOSFileSystemType;
+extern NSString *ULTestCaseHFSCaseInsensitiveFileSystemType;
+extern NSString *ULTestCaseHFSCaseSensitiveFileSystemType;
 
 /*!
  @abstract Unmounts a temporary test file system.
  */
-- (void)unmountDummyFilesystemAtURL:(NSURL *)volumeURL;
+- (void)ul_unmountDummyFilesystemAtURL:(NSURL *)volumeURL;
 
 /*!
  @abstract Verifies whether the tests are running on a case sensitive volume.
  */
-- (BOOL)isCaseSensitiveTestVolume;
+- (BOOL)ul_isCaseSensitiveTestVolume;
 
 /*!
  @abstract Runs the passed command line script and waits for its termination.
  */
-- (void)runScript:(NSString *)script;
+- (void)ul_runScript:(NSString *)script;
 #endif
 
 @end
@@ -113,64 +103,73 @@ extern NSString *TestCaseHFSCaseSensitiveFileSystemType;
 
 #pragma mark - Asynchronous testing
 
-@interface XCTestCase (AsynchronousTesting)
+@interface XCTestCase (UL_AsynchronousTesting)
 
 /*!
  @abstract Performs an operation and waits for the completion handler to be executed.
  */
-- (BOOL)performOperation:(void (^)(void (^completionHandler)(BOOL)))block;
+- (BOOL)ul_performOperation:(void (^)(void (^completionHandler)(BOOL)))block;
 
 /*!
  @abstract Performs two operations and waits for the completion handlers to be executed.
  */
-- (BOOL)performOperation:(void (^)(void (^completionHandler)(BOOL)))block andOperation:(void (^)(void (^completionHandler)(BOOL)))block2;
+- (BOOL)ul_performOperation:(void (^)(void (^completionHandler)(BOOL)))block andOperation:(void (^)(void (^completionHandler)(BOOL)))block2;
 
 /*!
  @abstract Performs a series of operations. Each operation is a block with the signature void (^)(void (^completionHandler)(BOOL)). Waits for the passed completion handler to be executed.
  */
-- (BOOL)performOperations:(NSArray *)blocks;
+- (BOOL)ul_performOperations:(NSArray *)blocks;
 
 /*!
  @abstract Performs an operation and waits for a completion handler to complete.
  */
-- (id)performOperationWithObjectHandler:(void (^)(void (^completionHandler)(id)))block;
+- (id)ul_performOperationWithObjectHandler:(void (^)(void (^completionHandler)(id)))block;
 
 
 /*!
  @abstract Returns 'YES' if the condition was satisfied within the given timeout
  */
-- (BOOL)waitForCondition:(BOOL (^)(void))block onMainLoop:(BOOL)waitOnMainLoop otherQueues:(NSArray *)otherQueues timeout:(NSTimeInterval)timeout;
+- (BOOL)ul_waitForCondition:(BOOL (^)(void))block onMainLoop:(BOOL)waitOnMainLoop otherQueues:(NSArray *)otherQueues timeout:(NSTimeInterval)timeout;
 
 /*
  * @abstract Waits for a series of assertions to become true in a specified timeout. If no assertion becomes true, a failure block will be performed.
  * @discussion Please use ULWaitOnAssertions or ULWaitOnAssertion! It provides better error reporting if an assertion fails! The conditions array consists of pairs of dictionaries using TestCaseAsynchronousConditionKey and TestCaseAsynchronousAssertionKey.
  */
-- (BOOL)waitOnMainLoop:(int)waitOnMainLoop otherQueues:(NSArray *)otherQueues withTimeout:(NSTimeInterval)timeout andAssertionDescriptors:(NSArray *)descriptors;
+- (BOOL)ul_waitForConditionOnMainLoop:(BOOL)waitOnMainLoop otherQueues:(NSArray *)otherQueues withTimeout:(NSTimeInterval)timeout andAssertionDescriptors:(NSArray *)descriptors;
 
 /*!
  * @abstract A key used in assertion descriptors. Maps to a block ^BOOL() that should be used to test whether an asynchronous assertion has become true.
  */
-extern NSString *TestCaseAsynchronousConditionKey;
+extern NSString *ULTestCaseAsynchronousConditionKey;
 
 /*!
  * @abstract A key used in assertion descriptors. Maps to a block ^() that should perform a XCTestFail with a descriptive error message.
  */
-extern NSString *TestCaseAsynchronousAssertionKey;
+extern NSString *ULTestCaseAsynchronousAssertionKey;
 
 @end
 
 // Waits for a block of assertions (defined with ULAwaitedAssertion)
-#define ULWaitOnAssertions(__args...)									([self waitOnMainLoop:YES otherQueues:nil withTimeout:30 andAssertionDescriptors:@[ __args ]])
+#define ULWaitOnAssertions(__args...)									([self ul_waitForConditionOnMainLoop:YES otherQueues:nil withTimeout:10 andAssertionDescriptors:@[ __args ]])
 
 // Convenience: Waits and asserts a single condition
-#define ULWaitOnAssertion(__condition, __description, __other...)		ULWaitOnAssertions(ULAwaitedAssertion(__condition, __description, ##__other));
+#define ULWaitOnAssertion(__condition, ...)								ULWaitOnAssertions(ULAwaitedAssertion(__condition, @"" __VA_ARGS__));
+
+// Convenience: Waits and asserts that two objects are equal
+#define ULWaitOnEqual(__varA, __varB, ...)								ULWaitOnAssertion((__varA) == (__varB), __VA_ARGS__);
+
+// Convenience: Waits and asserts that two objects are equal
+#define ULWaitOnEqualObjects(__objectA, __objectB, ...)					ULWaitOnAssertion([(__objectA) isEqual: (__objectB)],  __VA_ARGS__);
 
 // An assertion that should be waited for in ULWaitOnAssertions
 #define ULAwaitedAssertion(__condition, __description, __other...)		\
 	@{\
-		TestCaseAsynchronousConditionKey:		^BOOL{ return ((__condition) != 0); },\
-		TestCaseAsynchronousAssertionKey:		^{ XCTFail(__description, ##__other); }\
+		ULTestCaseAsynchronousConditionKey:		^BOOL{ return ((__condition) != 0); },\
+		ULTestCaseAsynchronousAssertionKey:		^{ XCTFail(__description, ##__other); }\
 	}
 
 // Executes the given statements during the wait operation. If variables should be manipulated, these variables must be declared with __block scope.
-#define ULPerformOnWait(__statements)					@{TestCaseAsynchronousConditionKey: ^BOOL{ __statements; return YES; }, TestCaseAsynchronousAssertionKey: ^{ } }
+#define ULPerformOnWait(__statements)					@{ULTestCaseAsynchronousConditionKey: ^BOOL{ __statements; return YES; }, ULTestCaseAsynchronousAssertionKey: ^{ } }
+
+// Convenience: Asserts whether two file URLs are equal.
+#define ULAssertEqualFileURLs(__urlA, __urlB, __description, __other...)				XCTAssertTrue([(__urlA) ul_isEqualToFileURL: (__urlB)], __description, ##__other)

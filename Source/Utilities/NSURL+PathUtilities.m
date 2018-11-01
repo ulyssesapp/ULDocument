@@ -1,7 +1,7 @@
 //
 //	NSURL+PathUtilities.m
 //
-//  Copyright (c) 2014 The Soulmen GbR
+//  Copyright © 2018 Ulysses GmbH & Co. KG
 //
 //	Permission is hereby granted, free of charge, to any person obtaining a copy
 //	of this software and associated documentation files (the "Software"), to deal
@@ -33,6 +33,9 @@ void *NSURLCachedStandardizedPathKey		= "NSURLCachedStandardizedPathKey";
 
 - (BOOL)ul_isCaseSensitiveFileURL
 {
+#if TARGET_OS_IPHONE && !TARGET_IPHONE_SIMULATOR
+	return YES;
+#else
 	// Prefer cached value if possible
 	NSNumber *isCaseSensitive = objc_getAssociatedObject(self, NSURLCachedIsCaseSensitiveFileURLKey);
 	if (isCaseSensitive)
@@ -53,12 +56,11 @@ void *NSURLCachedStandardizedPathKey		= "NSURLCachedStandardizedPathKey";
 	
 	objc_setAssociatedObject(self, NSURLCachedIsCaseSensitiveFileURLKey, isCaseSensitive, OBJC_ASSOCIATION_RETAIN);
 	return isCaseSensitive.boolValue;
+#endif
 }
 
 - (NSURL *)ul_URLByFastStandardizingPath
 {
-	NSAssert(self.isFileURL, @"Cannot standardize non-file URLs");
-	
 	NSString *cachedStandardizedPath = self.ul_cachedStandardizedPath;
 	
 	NSURL *url = [NSURL fileURLWithPath: cachedStandardizedPath];
@@ -69,14 +71,17 @@ void *NSURLCachedStandardizedPathKey		= "NSURLCachedStandardizedPathKey";
 
 - (NSString *)ul_cachedStandardizedPath
 {
-	NSAssert(self.isFileURL, @"Cannot standardize non-file URLs");
-	
 	// Use cached standardized path
 	NSString *standardizedPath = objc_getAssociatedObject(self, NSURLCachedStandardizedPathKey);
 	if (standardizedPath)
 		return standardizedPath;
 	
+	NSAssert(self.isFileURL, @"Cannot standardize non-file URLs");
 	NSString *path = self.URLByStandardizingPath.path;
+	
+	// In contrast to URLByStandardizing path, remove "/private" prefix also for non-existing pathes (required for files that have not been downloaded yet).
+	if ([path hasPrefix: @"/private/var/"])
+		path = [path substringFromIndex: @"/private".length];
 	
 	// Try to cache standardized path
 	objc_setAssociatedObject(self, NSURLCachedStandardizedPathKey, path, OBJC_ASSOCIATION_RETAIN);
@@ -149,15 +154,31 @@ void *NSURLCachedStandardizedPathKey		= "NSURLCachedStandardizedPathKey";
 
 #pragma mark - Attribute access
 
+- (NSDate *)ul_fileCreationDate
+{
+	// We may not flush the URL cache, since NSFileVersion seems to rely on exact instances somehow (ULDocumentTest -testVersionAutocreation will fail)
+	return [self resourceValuesForKeys:@[NSURLCreationDateKey] error:NULL][NSURLCreationDateKey];
+}
+
 - (NSDate *)ul_fileModificationDate
 {
 	return [self ul_uncachedResourceValueForKey:NSURLContentModificationDateKey error:NULL];
+}
+
+- (id)ul_generationIdentifier
+{
+	return [self ul_uncachedResourceValueForKey:NSURLGenerationIdentifierKey error:NULL] ?: @(self.ul_fileModificationDate.timeIntervalSinceReferenceDate);
 }
 
 - (NSDictionary *)ul_preservableFileAttributes
 {
 	// We may not flush the URL cache, since NSFileVersion seems to rely on exact instances somehow (ULDocumentTest -testVersionAutocreation will fail)
 	return [self resourceValuesForKeys:@[NSURLCreationDateKey] error:NULL];
+}
+
+- (BOOL)ul_isUbiquitousItem
+{
+	return [[self resourceValuesForKeys:@[NSURLIsUbiquitousItemKey] error:NULL][NSURLIsUbiquitousItemKey] boolValue];
 }
 
 @end

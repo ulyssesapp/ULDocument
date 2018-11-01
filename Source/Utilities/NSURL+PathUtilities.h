@@ -1,7 +1,7 @@
 //
 //	NSURL+PathUtilities.h
 //
-//  Copyright (c) 2014 The Soulmen GbR
+//  Copyright © 2018 Ulysses GmbH & Co. KG
 //
 //	Permission is hereby granted, free of charge, to any person obtaining a copy
 //	of this software and associated documentation files (the "Software"), to deal
@@ -61,15 +61,31 @@
 #pragma mark - Attribute queries
 
 /*!
+ @abstract Provides the file creation date.
+ */
+- (NSDate *)ul_fileCreationDate;
+
+/*!
  @abstract Provides the most recent file modification date.
  @discussion This method ensures to provide the most recent date by surpassing the URL resource value cache.
  */
 - (NSDate *)ul_fileModificationDate;
 
 /*!
+ @abstract Provides the most recent generation identifier.
+ @discussion If the underlying filesystem doesn't support generation identifier, the last modification timestamp is returned.
+ */
+- (id)ul_generationIdentifier;
+
+/*!
  @abstract Provides a dictionary with URL properties that should be preserved when rewriting, moving or copying a file.
  @discussion Currently, this is only the file creation date.
  */
 - (NSDictionary *)ul_preservableFileAttributes;
+
+/*!
+ @abstract Whether the URL is stored inside an iCloud storage or not.
+ */
+- (BOOL)ul_isUbiquitousItem;
 
 @end

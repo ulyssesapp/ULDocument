@@ -1,7 +1,7 @@
 //
-//	ULDocument_Subclassing.h
+//  ULDocument_Subclassing.h
 //
-//  Copyright (c) 2014 The Soulmen GbR
+//  Copyright © 2018 Ulysses GmbH & Co. KG
 //
 //	Permission is hereby granted, free of charge, to any person obtaining a copy
 //	of this software and associated documentation files (the "Software"), to deal
@@ -44,7 +44,6 @@ typedef enum : NSUInteger {
     ULDocumentChangeNotUndoable	= 1 << 8
 } ULDocumentChangeKind;
 
-
 /*!
  @abstract Methods that can be or should be overriden by subclasses.
  */
@@ -86,6 +85,12 @@ typedef enum : NSUInteger {
  */
 + (void)getChangeTokenURLAttributes:(NSArray **)attributes versionIdentifier:(NSString **)identifier;
 
+/*!
+ @abstract Specifies that the document should expect that package subitem changes are not notified correctly.
+ @discussion Ignored for non-package files. Defaults to NO.
+ */
++ (BOOL)shouldHandleSubitemChanges;
+
 
 #pragma mark - Filename handling
 
@@ -94,6 +99,12 @@ typedef enum : NSUInteger {
  @discussion Subclasses may override this method to perform additional filename sanitization. If specified, sanitization is allowed to reuse an existing filename if a filename collision occurs. Default implementation uses -preferredFilename for filename generation, regardless of existing filenames in the same folder.
  */
 - (NSURL *)URLForSaveOperation:(ULDocumentSaveOperation)saveOperation ignoreCurrentName:(BOOL)ignoreCurrentName;
+
+/*!
+ @abstract Notifies the subclass that the document has been persisted to its current -fileURL.
+ @discussion Will be called during file coordination and before updating the document's change token. Make sure that no expensive operation is performed at this point. Will not be called on Save To operations.
+ */
+- (void)didUpdatePersistentRepresentation;
 
 /*!
  @abstract Notifies the subclass that the file URL of the document has been changed while auto-saving the document.
