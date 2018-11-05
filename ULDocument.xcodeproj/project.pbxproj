@@ -35,6 +35,9 @@
 		7917C4EC1920F6EB00E57657 /* ULFilePresentationProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 7917C4431920D07B00E57657 /* ULFilePresentationProxy.m */; };
 		791F30F61920F79500771735 /* ULDocumentTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7917C4751920DD9B00E57657 /* ULDocumentTest.m */; };
 		791F30F71920F80400771735 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7917C4BE1920F65D00E57657 /* UIKit.framework */; };
+		792176E921902DC9001FB0E5 /* ULDeadlockDetector.m in Sources */ = {isa = PBXBuildFile; fileRef = 792176E721902DC9001FB0E5 /* ULDeadlockDetector.m */; };
+		792176EA21902DC9001FB0E5 /* ULDeadlockDetector.m in Sources */ = {isa = PBXBuildFile; fileRef = 792176E721902DC9001FB0E5 /* ULDeadlockDetector.m */; };
+		792176EB21902DC9001FB0E5 /* ULDeadlockDetector.h in Headers */ = {isa = PBXBuildFile; fileRef = 792176E821902DC9001FB0E5 /* ULDeadlockDetector.h */; };
 		7987E5CC1920FB360073FA6B /* ULDocument-Mac-Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 7987E5CA1920FB360073FA6B /* ULDocument-Mac-Prefix.pch */; };
 		7987E5CE1920FD320073FA6B /* XCTestCase+TestExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 7917C47E1920DF3400E57657 /* XCTestCase+TestExtensions.m */; };
 		7987E5D01920FE100073FA6B /* NSDate+Utilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 7917C4511920D19500E57657 /* NSDate+Utilities.m */; };
@@ -45,9 +48,6 @@
 		79AC7CFB1920CE3400103E36 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79AC7CFA1920CE3400103E36 /* XCTest.framework */; };
 		79AC7CFC1920CE3400103E36 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79AC7CE91920CE3300103E36 /* Cocoa.framework */; };
 		79AC7CFF1920CE3400103E36 /* ULDocument OS X.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 79AC7CE61920CE3300103E36 /* ULDocument OS X.dylib */; };
-		79DA601D218B4F390006285D /* ULDeadlockDetector.m in Sources */ = {isa = PBXBuildFile; fileRef = 79DA601B218B4F390006285D /* ULDeadlockDetector.m */; };
-		79DA601E218B4F390006285D /* ULDeadlockDetector.m in Sources */ = {isa = PBXBuildFile; fileRef = 79DA601B218B4F390006285D /* ULDeadlockDetector.m */; };
-		79DA601F218B4F390006285D /* ULDeadlockDetector.h in Headers */ = {isa = PBXBuildFile; fileRef = 79DA601C218B4F390006285D /* ULDeadlockDetector.h */; };
 		79DA6022218B4F4E0006285D /* NSString+UniqueIdentifier.h in Headers */ = {isa = PBXBuildFile; fileRef = 79DA6020218B4F4E0006285D /* NSString+UniqueIdentifier.h */; };
 		79DA6023218B4F4E0006285D /* NSString+UniqueIdentifier.m in Sources */ = {isa = PBXBuildFile; fileRef = 79DA6021218B4F4E0006285D /* NSString+UniqueIdentifier.m */; };
 		79DA6024218B4F4E0006285D /* NSString+UniqueIdentifier.m in Sources */ = {isa = PBXBuildFile; fileRef = 79DA6021218B4F4E0006285D /* NSString+UniqueIdentifier.m */; };
@@ -106,6 +106,8 @@
 		7917C4C41920F6D300E57657 /* libULDocument iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libULDocument iOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7917C4C51920F6D300E57657 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		7917C4D21920F6D300E57657 /* ULDocument Tests iOS.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "ULDocument Tests iOS.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		792176E721902DC9001FB0E5 /* ULDeadlockDetector.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ULDeadlockDetector.m; sourceTree = "<group>"; };
+		792176E821902DC9001FB0E5 /* ULDeadlockDetector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ULDeadlockDetector.h; sourceTree = "<group>"; };
 		7987E5C91920FB360073FA6B /* ULDocument-iOS-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ULDocument-iOS-Prefix.pch"; sourceTree = "<group>"; };
 		7987E5CA1920FB360073FA6B /* ULDocument-Mac-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ULDocument-Mac-Prefix.pch"; sourceTree = "<group>"; };
 		79AC7CE61920CE3300103E36 /* ULDocument OS X.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = "ULDocument OS X.dylib"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -116,8 +118,6 @@
 		79AC7CF91920CE3400103E36 /* ULDocument Tests Mac.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "ULDocument Tests Mac.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		79AC7CFA1920CE3400103E36 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		79AC7D151920D00A00103E36 /* ULDocumentTests-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "ULDocumentTests-Info.plist"; sourceTree = "<group>"; };
-		79DA601B218B4F390006285D /* ULDeadlockDetector.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ULDeadlockDetector.m; path = "../../../../Ulysses3/Ulysses 3/Source/Utilities/General/ULDeadlockDetector.m"; sourceTree = "<group>"; };
-		79DA601C218B4F390006285D /* ULDeadlockDetector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ULDeadlockDetector.h; path = "../../../../Ulysses3/Ulysses 3/Source/Utilities/General/ULDeadlockDetector.h"; sourceTree = "<group>"; };
 		79DA6020218B4F4E0006285D /* NSString+UniqueIdentifier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+UniqueIdentifier.h"; sourceTree = "<group>"; };
 		79DA6021218B4F4E0006285D /* NSString+UniqueIdentifier.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+UniqueIdentifier.m"; sourceTree = "<group>"; };
 		79DA602E218B57450006285D /* ULWeakify.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ULWeakify.h; sourceTree = "<group>"; };
@@ -178,8 +178,8 @@
 				79DA6021218B4F4E0006285D /* NSString+UniqueIdentifier.m */,
 				7917C4581920D19C00E57657 /* NSURL+PathUtilities.h */,
 				7917C4591920D19C00E57657 /* NSURL+PathUtilities.m */,
-				79DA601C218B4F390006285D /* ULDeadlockDetector.h */,
-				79DA601B218B4F390006285D /* ULDeadlockDetector.m */,
+				792176E821902DC9001FB0E5 /* ULDeadlockDetector.h */,
+				792176E721902DC9001FB0E5 /* ULDeadlockDetector.m */,
 				7917C4421920D07B00E57657 /* ULFilePresentationProxy.h */,
 				7917C4431920D07B00E57657 /* ULFilePresentationProxy.m */,
 				79DA602E218B57450006285D /* ULWeakify.h */,
@@ -296,10 +296,10 @@
 			files = (
 				7917C45A1920D19C00E57657 /* NSFileCoordinator+Convenience.h in Headers */,
 				7917C4521920D19500E57657 /* NSDate+Utilities.h in Headers */,
+				792176EB21902DC9001FB0E5 /* ULDeadlockDetector.h in Headers */,
 				79DA6022218B4F4E0006285D /* NSString+UniqueIdentifier.h in Headers */,
 				7987E5CC1920FB360073FA6B /* ULDocument-Mac-Prefix.pch in Headers */,
 				7917C4441920D07B00E57657 /* ULFilePresentationProxy.h in Headers */,
-				79DA601F218B4F390006285D /* ULDeadlockDetector.h in Headers */,
 				7917C4721920DA4900E57657 /* ULDocument_Subclassing.h in Headers */,
 				7917C45C1920D19C00E57657 /* NSFileManager+FilesystemConvenience.h in Headers */,
 				7917C45E1920D19C00E57657 /* NSURL+PathUtilities.h in Headers */,
@@ -437,11 +437,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				7917C4E81920F6EB00E57657 /* NSDate+Utilities.m in Sources */,
+				792176EA21902DC9001FB0E5 /* ULDeadlockDetector.m in Sources */,
 				7917C4EB1920F6EB00E57657 /* NSURL+PathUtilities.m in Sources */,
 				7917C4EC1920F6EB00E57657 /* ULFilePresentationProxy.m in Sources */,
 				79DA6024218B4F4E0006285D /* NSString+UniqueIdentifier.m in Sources */,
 				7917C4EA1920F6EB00E57657 /* NSFileManager+FilesystemConvenience.m in Sources */,
-				79DA601E218B4F390006285D /* ULDeadlockDetector.m in Sources */,
 				7917C4E71920F6EB00E57657 /* ULDocument.m in Sources */,
 				7917C4E91920F6EB00E57657 /* NSFileCoordinator+Convenience.m in Sources */,
 			);
@@ -466,11 +466,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				7917C4451920D07B00E57657 /* ULFilePresentationProxy.m in Sources */,
+				792176E921902DC9001FB0E5 /* ULDeadlockDetector.m in Sources */,
 				7917C44B1920D08200E57657 /* ULDocument.m in Sources */,
 				7917C45D1920D19C00E57657 /* NSFileManager+FilesystemConvenience.m in Sources */,
 				79DA6023218B4F4E0006285D /* NSString+UniqueIdentifier.m in Sources */,
 				7917C4531920D19500E57657 /* NSDate+Utilities.m in Sources */,
-				79DA601D218B4F390006285D /* ULDeadlockDetector.m in Sources */,
 				7917C45B1920D19C00E57657 /* NSFileCoordinator+Convenience.m in Sources */,
 				7917C45F1920D19C00E57657 /* NSURL+PathUtilities.m in Sources */,
 			);
