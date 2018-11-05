@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
 	s.name					= "ULDocument"
-	s.version				= "1.1.0"
+	s.version				= "1.1.1"
 	s.license				= "MIT"
 	s.homepage				= "https://github.com/soulmen/ULDocument.git"
 	s.summary				= "A lightweight and iCloud-ready document class."

@@ -365,7 +365,7 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 	if (self.fileURL) {
 		dispatch_async(_autosaveQueue, ^{
 			// Autosave is already scheduled or pending: do nothing.
-			if (_autosaveToken)
+			if (self->_autosaveToken)
 				return;
 			
 			// Activate autosave token to ensure document is kept alive and saved on exit
@@ -376,7 +376,7 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 			
 			// Run autosave after predefined delay.
 			__weak ULDocument *weakSelf = self;
-			dispatch_after(dispatch_time(DISPATCH_TIME_NOW, autosaveDelay * NSEC_PER_SEC), _autosaveQueue, ^(void) {
+			dispatch_after(dispatch_time(DISPATCH_TIME_NOW, autosaveDelay * NSEC_PER_SEC), self->_autosaveQueue, ^(void) {
 				ULDocument *strongSelf = weakSelf;
 				if (!strongSelf || !strongSelf->_autosaveToken)
 					return;
@@ -582,7 +582,7 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 		
 		ULNoticeBeginURL(self.fileURL);
 		
-		[[[NSFileCoordinator alloc] initWithFilePresenter: _presenter] coordinateReadingItemAtURL:self.fileURL options:NSFileCoordinatorReadingWithoutChanges error:&error byAccessor:^(NSURL *newURL) {
+		[[[NSFileCoordinator alloc] initWithFilePresenter: self->_presenter] coordinateReadingItemAtURL:self.fileURL options:NSFileCoordinatorReadingWithoutChanges error:&error byAccessor:^(NSURL *newURL) {
 			// Document has been opened in the meantime
 			if (self.documentIsOpen) {
 				success = YES;
@@ -671,9 +671,9 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 		
 		ULNoticeBeginURL(self.fileURL);
 		
-		[[[NSFileCoordinator alloc] initWithFilePresenter: _presenter] coordinateWritingItemAtURL:self.fileURL options:NSFileCoordinatorWritingForDeleting error:&error byAccessor:^(NSURL *newURL) {
+		[[[NSFileCoordinator alloc] initWithFilePresenter: self->_presenter] coordinateWritingItemAtURL:self.fileURL options:NSFileCoordinatorWritingForDeleting error:&error byAccessor:^(NSURL *newURL) {
 			// File has been deleted externally
-			if (_deletionPending) {
+			if (self->_deletionPending) {
 				deleteError = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey: @"Deletion pending."}];
 				return;
 			}
@@ -738,7 +738,7 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 		
 		ULNoticeBeginURL(self.fileURL);
 		
-		[[[NSFileCoordinator alloc] initWithFilePresenter: _presenter] coordinateReadingItemAtURL:url options:NSFileCoordinatorReadingWithoutChanges error:&error byAccessor:^(NSURL *newURL) {
+		[[[NSFileCoordinator alloc] initWithFilePresenter: self->_presenter] coordinateReadingItemAtURL:url options:NSFileCoordinatorReadingWithoutChanges error:&error byAccessor:^(NSURL *newURL) {
 			// Attempt read
 			self.fileURL = newURL;
 			success = [self coordinatedOpenFromURL:newURL error:&readError];
@@ -778,7 +778,7 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 		NSError *error;
 		__block NSError *operationError;
 		
-		[[[NSFileCoordinator alloc] initWithFilePresenter: _presenter] coordinateReadingItemAtURL:version.URL options:NSFileCoordinatorReadingWithoutChanges writingItemAtURL:self.fileURL options:NSFileCoordinatorWritingForReplacing error:&error byAccessor:^(NSURL *srcURL, NSURL *destURL) {
+		[[[NSFileCoordinator alloc] initWithFilePresenter: self->_presenter] coordinateReadingItemAtURL:version.URL options:NSFileCoordinatorReadingWithoutChanges writingItemAtURL:self.fileURL options:NSFileCoordinatorWritingForReplacing error:&error byAccessor:^(NSURL *srcURL, NSURL *destURL) {
 			NSError *localError;
 			
 			// Replace file
@@ -875,7 +875,7 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 	NSParameterAssert(url);
 	
 	[ULDeadlockDetector performOperationWithContext:@(saveOperation) maximumDuration:ULDocumentMaximumSaveDuration delegate:self usingBlock:^(void (^terminationHandler)(void)) {
-		[_interactionQueue addOperationWithBlock:^{
+		[self->_interactionQueue addOperationWithBlock:^{
 			__autoreleasing NSError *error;
 			
 			// Perform write
@@ -919,7 +919,7 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 		
 		[coordinator ul_coordinateMovingItemAtURL:self.fileURL toURL:url error:&localError byAccessor:^(NSURL *currentURL, NSURL *newURL) {
 			// File has been deleted externally
-			if (_deletionPending) {
+			if (self->_deletionPending) {
 				operationError = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey: @"Deletion pending."}];
 				return;
 			}
@@ -938,7 +938,7 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 			self.fileURL = movedURL;
 			
 			// File has been deleted externally
-			if (_deletionPending) {
+			if (self->_deletionPending) {
 				operationError = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey: @"Deletion pending."}];
 				success = NO;
 				return;
@@ -963,7 +963,7 @@ NSString *ULDocumentUnhandeledSaveErrorNotificationErrorKey			= @"error";
 		
 		[[[NSFileCoordinator alloc] initWithFilePresenter: _presenter] coordinateWritingItemAtURL:url options:0 error:&localError byAccessor:^(NSURL *newURL) {
 			// File has been deleted externally
-			if (_deletionPending) {
+			if (self->_deletionPending) {
 				operationError = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey: @"Deletion pending."}];
 				return;
 			}

@@ -144,12 +144,12 @@
 		[self willChangeValueForKey: @"presentedItemURL"];
 		
 		[[[NSFileCoordinator alloc] initWithFilePresenter: self] coordinateReadingItemAtURL:newURL options:0 error:NULL byAccessor:^(NSURL *newURL) {
-			id owner = _owner;
+			id owner = self->_owner;
 			if (!owner)
 				return;
 			
 			[NSFileCoordinator removeFilePresenter: self];
-			_url = newURL;
+			self->_url = newURL;
 			[NSFileCoordinator addFilePresenter: self];
 		}];
 		

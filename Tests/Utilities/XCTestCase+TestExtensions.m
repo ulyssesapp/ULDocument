@@ -224,7 +224,7 @@ NSString *ULTestCaseAsynchronousAssertionKey	= @"ULTestCaseAsynchronousAssertion
 		failed = NO;
 		
 		for (NSDictionary *descriptor in descriptors) {
-			BOOL (^condition)() = descriptor[ULTestCaseAsynchronousConditionKey];
+			BOOL (^condition)(void) = descriptor[ULTestCaseAsynchronousConditionKey];
 			if (!condition()) {
 				failed = YES;
 				break;
@@ -246,9 +246,9 @@ NSString *ULTestCaseAsynchronousAssertionKey	= @"ULTestCaseAsynchronousAssertion
 		NSLog(@"Assertions not satisfied within %fs.", timeout);
 		
 		for (NSDictionary *descriptor in descriptors) {
-			BOOL (^condition)() = descriptor[ULTestCaseAsynchronousConditionKey];
+			BOOL (^condition)(void) = descriptor[ULTestCaseAsynchronousConditionKey];
 			if (!condition()) {
-				void (^assertion)() = descriptor[ULTestCaseAsynchronousAssertionKey];
+				void (^assertion)(void) = descriptor[ULTestCaseAsynchronousAssertionKey];
 				assertion();
 				break;
 			}
